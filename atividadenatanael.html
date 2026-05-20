@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Atividade de História | Análise de Iconografia</title>
+  
+  <!-- Fontes Google para Tipografia Premium -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN para Estilização Moderna -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Configuração do Tailwind para usar as novas fontes -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            serif: ['Playfair Display', 'serif'],
+          },
+          colors: {
+            museum: {
+              900: '#0f172a', // Slate 900
+              800: '#1e293b', // Slate 800
+              gold: '#d97706', // Amber 600
+              light: '#f8fafc', // Slate 50
+            }
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.5s ease-out',
+            'slide-up': 'slideUp 0.6s ease-out',
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' },
+            },
+            slideUp: {
+              '0%': { opacity: '0', transform: 'translateY(20px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- React, ReactDOM e Babel -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Biblioteca de Confetis para a tela de resultados -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <!-- Firebase v10 Compat (Carregamento ultra-estável e compatível) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    /* Estilos personalizados para transições e barra de rolagem elegante */
+    body {
+      background-color: #f8fafc;
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23e2e8f0' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .image-container {
+      cursor: grab;
+    }
+    .image-container:active {
+      cursor: grabbing;
+    }
+  </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen font-sans">
+
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    const SCHOOL_LOGO_URL = "https://i.ibb.co/Df0wxYjb/Design-sem-nome-5-removebg-preview.png";
+    const IMAGE_URL = "https://i.ibb.co/RGtcdfVC/onhb.jpg";
+
+    // DADOS OFICIAIS
+    const hints = [
+      { letter: 'A', text: 'A obra “Romaria Marítima diante do Hospital dos Lázaros”, óleo sobre tela, 96 x 126 cm (oval), sem assinatura e sem data (provavelmente c.1790) é uma produção do pintor, cenógrafo e arquiteto Leandro Joaquim e pertence ao acervo do Museu Histórico Nacional.' },
+      { letter: 'B', text: 'No alto de uma colina vê-se o Hospital dos Lázaros, um lazareto [instituição dedicada ao isolamento e tratamento de doentes com hanseníase].' },
+      { letter: 'C', text: 'Vemos antes embarcações que realizam uma Romaria Marítima, manifestação religiosa católica na qual fiéis percorrem rios ou o mar em barcos enfeitados.' },
+      { letter: 'D', text: 'Identifica-se pessoas negras na imagem, especialmente homens a remar nas embarcações.' },
+      { letter: 'E', text: 'Várias barracas são avistadas, provavelmente montadas para o conforto e descanso dos romeiros.' },
+      { letter: 'F', text: 'Um grupo de homens negros desloca-se à frente de um grupo de homens a cavalo.' },
+      { letter: 'G', text: 'Pode-se ver homens, mulheres e crianças na imagem, tanto nas embarcações como em terra.' },
+      { letter: 'H', text: 'Veículos de tração animal desatrelados são vistos na imagem.' },
+      { letter: 'I', text: 'Uma roda de moinho encontra-se próxima a uma construção e por elas passa um canal de água que deságua no mar.' },
+      { letter: 'J', text: 'Pessoas descansam junto a barracas, sob árvores e mesmo deitadas no chão.' },
+      { letter: 'K', text: 'Ao fundo vêem-se colinas e montanhas.' },
+      { letter: 'L', text: 'A vegetação é composta por árvores frondosas representadas de forma simétrica.' },
+      { letter: 'M', text: 'Há embarcações maiores e ricamente decoradas e outras mais simples e menores.' },
+      { letter: 'N', text: 'Há três pessoas negras num barco e duas delas parecem executar uma apresentação com instrumentos de sopro.' },
+      { letter: 'O', text: 'Mulheres, provavelmente da elite, usam chapéus decorados com penas.' },
+      { letter: 'P', text: 'Há embarcações conduzidas por remadores brancos.' },
+      { letter: 'Q', text: 'Construções em alvenaria, edifícios e muros podem ser vistos entre a praia e o Hospital.' },
+      { letter: 'R', text: 'Há grande número de bandeiras, especialmente brancas, vermelhas, brancas e vermelhas. Algumas trazem brasões.' },
+      { letter: 'S', text: 'Embarcações apresentam tendas que têm a função de proteger os passageiros do sol, chuva e vento.' },
+      { letter: 'T', text: 'Pessoas protegem-se sob guarda-sóis.' },
+      { letter: 'U', text: 'Pessoas aproximam-se do Hospital subindo aclives.' },
+      { letter: 'V', text: 'Um homem desce um pequeno morro trazendo um objeto redondo nas suas mãos.' },
+      { letter: 'W', text: 'Um grupo de homens negros adestra cavalos de montaria.' },
+      { letter: 'X', text: 'Todas as embarcações são conduzidas por remadores negros.' },
+      { letter: 'Y', text: 'Bandeiras são vistas tanto nas embarcações como em terra, especialmente nas cores verde e amarelo - cores da casa de Bragança.' },
+      { letter: 'Z', text: 'Um jovem leva uma bola de couro para a festa que acontece mais abaixo.' }
+    ];
+
+    const officialAnswers = {
+      1: 'A', 2: 'B', 3: 'C', 4: 'D', 5: 'E', 6: 'F', 7: 'G', 8: 'H', 9: 'I', 10: 'J',
+      11: 'K', 12: 'L', 13: 'M', 14: 'N', 15: 'O', 16: 'P', 17: 'Q', 18: 'R', 19: 'S',
+      20: 'T', 21: 'U', 22: 'V'
+    };
+
+    const crumbsPositions = [
+      { number: 1, left: 50.05, top: 9.54, study: "História da Arte Colonial, Leandro Joaquim e o Acervo do Museu Histórico Nacional." },
+      { number: 2, left: 20.02, top: 28.97, study: "História da saúde pública, Lazaretos e isolamento de doentes no Brasil Colonial." },
+      { number: 3, left: 50.05, top: 86.06, study: "Festividades católicas populares, Romarias Marítimas e apropriação do espaço costeiro." },
+      { number: 4, left: 64.94, top: 75.32, study: "Presença negra, representações e escravidão no trabalho portuário colonial." },
+      { number: 5, left: 52.37, top: 45.16, study: "Vida quotidiana e estruturas temporárias de abrigo em romarias de longa distância." },
+      { number: 6, left: 62.5, top: 37.49, study: "Relações de poder e trânsito social de diferentes etnias em áreas costeiras." },
+      { number: 7, left: 42.24, top: 43.97, study: "Demografia do Brasil Imperial: Convivência geracional e de género nos eventos cívicos." },
+      { number: 8, left: 38.82, top: 47.38, study: "Sistemas de transporte tradicionais: Veículos de tração animal." },
+      { number: 9, left: 26.46, top: 48.88, study: "História económica e engenharia colonial: Rodas de moinho e canais de escoamento." },
+      { number: 10, left: 17.7, top: 47.38, study: "Quotidiano e ócio popular: O repouso sob árvores e dinâmicas de lazer colonial." },
+      { number: 11, left: 44.68, top: 28.97, study: "Análise de paisagem iconográfica: Perspetivas geográficas na pintura colonial." },
+      { number: 12, left: 33.3, top: 39.74, study: "Representações de fauna e flora: Simetrias estéticas na vegetação da pintura académica." },
+      { number: 13, left: 42.24, top: 73.07, study: "Tipologia naval e distinções de prestígio entre embarcações maiores e menores." },
+      { number: 14, left: 21.19, top: 71.95, study: "Expressões culturais afro-brasileiras e instrumentos de sopro no ambiente colonial." },
+      { number: 15, left: 21.29, top: 48.5, study: "Indumentária e distinções de classe: Chapéus ornamentados e códigos de vestuário da elite." },
+      { number: 16, left: 13.11, top: 63.63, study: "Análise crítica do trabalho na pintura e remadores no litoral brasileiro." },
+      { number: 17, left: 25.29, top: 42.84, study: "Arquitetura e urbanização colonial de alvenaria próximas à baía." },
+      { number: 18, left: 49.27, top: 72.39, study: "Simbologias políticas: Bandeiras, cores heráldicas e brasões institucionais." },
+      { number: 19, left: 46.92, top: 56.17, study: "Sistemas de proteção contra intempéries em embarcações históricas." },
+      { number: 20, left: 57.13, top: 72.39, study: "Tecnologia e moda utilitária colonial: Guarda-sóis e sombrinhas de prestígio." },
+      { number: 21, left: 22.2, top: 36.12, study: "Caminhos sagrados e de romarias: Percursos geográficos em aclives." },
+      { number: 22, left: 13.6, top: 46.9, study: "Micro-histórias quotidianas expressas em elements figurativos pequenos na iconografia." }
+    ];
+
+    // Componente de Ícone SVG simples
+    const Icon = ({ path, className = "w-6 h-6" }) => (
+      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={path}></path>
+      </svg>
+    );
+
+    function App() {
+      const [user, setUser] = useState(null);
+      const [view, setView] = useState('login'); 
+      const [loading, setLoading] = useState(true);
+      const [errorBanner, setErrorBanner] = useState('');
+      const [zoomScale, setZoomScale] = useState(1);
+      
+      const [studentData, setStudentData] = useState({ name: '', shift: '', classRoom: '' });
+      const [answers, setAnswers] = useState({});
+      const [activeCrumb, setActiveCrumb] = useState(null);
+      const [resultData, setResultData] = useState(null);
+
+      useEffect(() => {
+        const initFirebase = async () => {
+          try {
+            let config;
+            // Verifica se o ambiente injetou definições automáticas
+            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+              config = typeof __firebase_config === 'string' ? JSON.parse(__firebase_config) : __firebase_config;
+            } else {
+              // Fallback com as credenciais reais do seu print do Firebase Console
+              config = {
+                apiKey: "AIzaSyALUGZXbuWok-hzgdyiHXRA5Dl0kFtp5s8",
+                authDomain: "atividade-natanel.firebaseapp.com",
+                projectId: "atividade-natanel",
+                storageBucket: "atividade-natanel.firebasestorage.app",
+                messagingSenderId: "1032804060146",
+                appId: "1:1032804060146:web:bdb86134e6ef63ff77396b",
+                measurementId: "G-K0YJS8FRR1"
+              };
+            }
+
+            // Inicialização segura usando a biblioteca global (compat) carregada no head
+            let appInstance;
+            if (!firebase.apps.length) {
+              appInstance = firebase.initializeApp(config);
+            } else {
+              appInstance = firebase.app();
+            }
+
+            const authInstance = firebase.auth(appInstance);
+            window.db = firebase.firestore(appInstance);
+
+            // Regra 3: Autenticar antes de qualquer consulta
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+              await authInstance.signInWithCustomToken(__initial_auth_token);
+            } else {
+              await authInstance.signInAnonymously();
+            }
+
+            const unsubscribe = authInstance.onAuthStateChanged((currentUser) => {
+              setUser(currentUser);
+              setLoading(false);
+            });
+            
+            return unsubscribe;
+          } catch (err) {
+            console.error("Erro ao inicializar o Firebase:", err);
+            setErrorBanner("Erro de Autenticação: Verifique se o domínio de pré-visualização está adicionado aos domínios autorizados nas definições de Autenticação do seu painel Firebase.");
+            setLoading(false);
+          }
+        };
+
+        let unsubscribeFn;
+        initFirebase().then(unsub => {
+          unsubscribeFn = unsub;
+        });
+
+        return () => {
+          if (unsubscribeFn) unsubscribeFn();
+        };
+      }, []);
+
+      const handleStartQuiz = (e) => {
+        e.preventDefault();
+        if (studentData.name && studentData.shift && studentData.classRoom) {
+          setErrorBanner('');
+          setView('quiz');
+          window.scrollTo(0, 0);
+        }
+      };
+
+      const handleSelectAnswer = (crumbNumber, letter) => {
+        const newAnswers = { ...answers };
+        Object.keys(newAnswers).forEach(key => {
+          if (newAnswers[key] === letter) delete newAnswers[key];
+        });
+        newAnswers[crumbNumber] = letter;
+        setAnswers(newAnswers);
+        setActiveCrumb(null);
+      };
+
+      const calculateResults = () => {
+        let correctCount = 0;
+        const total = crumbsPositions.length;
+        const details = crumbsPositions.map(crumb => {
+          const userAnswer = answers[crumb.number] || 'Não respondida';
+          const correctAnswer = officialAnswers[crumb.number];
+          const isCorrect = userAnswer === correctAnswer;
+          if (isCorrect) correctCount++;
+          return { crumbNumber: crumb.number, userAnswer, correctAnswer, isCorrect, studyTopic: isCorrect ? null : crumb.study };
+        });
+        const hitPercentage = Math.round((correctCount / total) * 100);
+        return { correctCount, total, hitPercentage, errorPercentage: 100 - hitPercentage, details };
+      };
+
+      const handleSubmitQuiz = async () => {
+        if (!user) return;
+        if (Object.keys(answers).length < crumbsPositions.length) {
+          setErrorBanner(`Atenção: Associou apenas ${Object.keys(answers).length} de ${crumbsPositions.length} migalhas. Preencha todas!`);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return;
+        }
+
+        setLoading(true);
+        setErrorBanner('');
+        const results = calculateResults();
+        setResultData(results);
+
+        try {
+          const appId = typeof __app_id !== 'undefined' ? __app_id : 'atividade-natanel';
+          
+          if (window.db && user) {
+            // Regras 1 & 2: Caminho estrito para o Firestore do ambiente
+            const answersPath = `artifacts/${appId}/public/data/respostas_alunos`;
+            
+            await window.db.collection(answersPath).add({
+              student: { name: studentData.name.trim(), shift: studentData.shift, classRoom: studentData.classRoom.trim() },
+              answers: answers,
+              score: results.correctCount,
+              totalQuestions: results.total,
+              percentage: results.hitPercentage,
+              timestamp: Date.now(),
+              userId: user.uid
+            });
+          } else {
+            console.warn("Modo Offline: Não foi possível gravar na base de dados devido a credenciais inválidas.");
+          }
+
+          setView('result');
+          window.scrollTo(0, 0);
+          
+          // Lançar confetis se a nota for boa!
+          if (results.hitPercentage > 50) {
+            confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, colors: ['#d97706', '#10b981', '#3b82f6'] });
+          }
+        } catch (error) {
+          console.error("Erro no Firebase:", error);
+          setErrorBanner("Ocorreu um erro ao guardar. Tente novamente.");
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      const progressCount = Object.keys(answers).length;
+      const progressPercent = Math.round((progressCount / crumbsPositions.length) * 100);
+
+      if (loading && !user) {
+        return (
+          <div className="min-h-screen flex items-center justify-center bg-museum-900 text-museum-gold font-sans">
+            <div className="flex flex-col items-center">
+              <div className="w-12 h-12 border-4 border-museum-gold border-t-transparent rounded-full animate-spin mb-4"></div>
+              <p className="font-medium text-lg tracking-wide">A preparar a exposição...</p>
+            </div>
+          </div>
+        );
+      }
+
+      return (
+        <div className="min-h-screen flex flex-col font-sans">
+          {/* Cabeçalho Premium */}
+          <header className="bg-museum-900 text-white shadow-xl relative z-10 border-b-4 border-museum-gold">
+            <div className="max-w-7xl mx-auto px-4 py-4 md:py-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+              <div className="flex items-center gap-4">
+                <div className="bg-white/10 p-2.5 rounded-xl backdrop-blur-sm">
+                  <Icon path="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" className="w-8 h-8 text-museum-gold" />
+                </div>
+                <div>
+                  <h1 className="text-xl md:text-2xl font-bold font-serif tracking-wide text-museum-light">
+                    Análise de Iconografia
+                  </h1>
+                  <p className="text-sm text-slate-400 font-medium tracking-wider uppercase">Atividade de História</p>
+                </div>
+              </div>
+              <div className="bg-white rounded-lg p-1.5 shadow-inner">
+                <img src={SCHOOL_LOGO_URL} alt="Logótipo" className="h-10 md:h-12 w-auto object-contain" onError={(e) => e.target.style.display = 'none'} />
+              </div>
+            </div>
+          </header>
+
+          <main className="flex-grow max-w-7xl mx-auto w-full p-4 md:p-6 lg:p-8 relative z-0">
+            
+            {/* Mensagem de Erro Global */}
+            {errorBanner && (
+              <div className="animate-slide-up mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg shadow-md flex items-start gap-3">
+                <Icon path="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" className="w-6 h-6 text-red-500 flex-shrink-0 mt-0.5" />
+                <p className="text-red-800 font-medium">{errorBanner}</p>
+              </div>
+            )}
+
+            {/* VIEW: LOGIN */}
+            {view === 'login' && (
+              <div className="animate-fade-in flex items-center justify-center py-10 md:py-20 relative">
+                {/* Background Decorativo no Login */}
+                <div className="absolute inset-0 z-0 opacity-20 pointer-events-none rounded-3xl overflow-hidden shadow-2xl">
+                   <img src={IMAGE_URL} className="w-full h-full object-cover blur-sm" alt="Fundo" />
+                   <div className="absolute inset-0 bg-gradient-to-t from-museum-900 to-transparent"></div>
+                </div>
+
+                <div className="glass-panel rounded-2xl shadow-2xl p-6 md:p-10 max-w-lg w-full relative z-10 border-t-4 border-t-museum-gold">
+                  <div className="text-center mb-8">
+                    <h2 className="text-3xl font-serif font-bold text-museum-900 mb-2">Identificação</h2>
+                    <p className="text-slate-500">Por favor, preencha os seus dados para aceder à exposição interativa.</p>
+                  </div>
+                  
+                  <form onSubmit={handleStartQuiz} className="space-y-5">
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-1.5">Nome Completo</label>
+                      <input 
+                        type="text" required
+                        className="w-full p-3.5 bg-slate-50/80 border border-slate-200 rounded-xl focus:ring-2 focus:ring-museum-gold focus:border-museum-gold outline-none transition-all shadow-sm"
+                        placeholder="Insira o seu nome"
+                        value={studentData.name}
+                        onChange={(e) => setStudentData({...studentData, name: e.target.value})}
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Turma</label>
+                        <input 
+                          type="text" required
+                          className="w-full p-3.5 bg-slate-50/80 border border-slate-200 rounded-xl focus:ring-2 focus:ring-museum-gold focus:border-museum-gold outline-none transition-all shadow-sm"
+                          placeholder="Ex: 3º Ano A"
+                          value={studentData.classRoom}
+                          onChange={(e) => setStudentData({...studentData, classRoom: e.target.value})}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Turno</label>
+                        <select 
+                          required
+                          className="w-full p-3.5 bg-slate-50/80 border border-slate-200 rounded-xl focus:ring-2 focus:ring-museum-gold focus:border-museum-gold outline-none transition-all shadow-sm appearance-none"
+                          value={studentData.shift}
+                          onChange={(e) => setStudentData({...studentData, shift: e.target.value})}
+                        >
+                          <option value="">Selecione...</option>
+                          <option value="Manhã">Manhã</option>
+                          <option value="Tarde">Tarde</option>
+                          <option value="Noite">Noite</option>
+                        </select>
+                      </div>
+                    </div>
+                    <button type="submit" className="w-full mt-6 bg-museum-900 hover:bg-slate-800 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl flex justify-center items-center gap-3 text-lg group">
+                      Entrar na Atividade
+                      <Icon path="M14 5l7 7m0 0l-7 7m7-7H3" className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    </button>
+                  </form>
+                </div>
+              </div>
+            )}
+
+            {/* VIEW: QUIZ */}
+            {view === 'quiz' && (
+              <div className="animate-fade-in space-y-6">
+                
+                {/* Cabeçalho de Instruções e Progresso */}
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 md:p-7 flex flex-col lg:flex-row gap-6 justify-between items-start lg:items-center">
+                  <div className="max-w-2xl">
+                    <h2 className="text-2xl font-serif font-bold text-museum-900 mb-2">Análise da Obra</h2>
+                    <p className="text-slate-600 leading-relaxed">
+                      Explore a pintura <strong>"Romaria Marítima diante do Hospital dos Lázaros"</strong>. 
+                      Clique nos marcadores numéricos para associar os elementos visuais às descrições históricas (letras de A a Z).
+                    </p>
+                  </div>
+                  <div className="w-full lg:w-72 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                    <div className="flex justify-between items-end mb-2">
+                      <span className="text-sm font-bold text-slate-500 uppercase tracking-wide">Progresso</span>
+                      <span className="text-xl font-black text-museum-gold">{progressCount}<span className="text-sm text-slate-400">/{crumbsPositions.length}</span></span>
+                    </div>
+                    <div className="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
+                      <div className="bg-museum-gold h-2.5 rounded-full transition-all duration-500 ease-out" style={{ width: `${progressPercent}%` }}></div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Área da Pintura (Quadro Principal) */}
+                <div className="bg-museum-900 rounded-2xl shadow-2xl p-4 md:p-8 border-[12px] border-[#3e2723] relative">
+                  
+                  {/* Controles de Zoom */}
+                  <div className="absolute top-6 left-6 z-20 flex flex-col gap-2 bg-museum-900/80 p-2 rounded-xl backdrop-blur-md border border-white/10 shadow-lg">
+                    <button onClick={() => setZoomScale(Math.min(zoomScale + 0.3, 3))} className="p-2.5 text-white hover:bg-white/20 rounded-lg transition-colors" title="Ampliar">
+                      <Icon path="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
+                    </button>
+                    <div className="h-px bg-white/20 mx-1"></div>
+                    <button onClick={() => setZoomScale(Math.max(zoomScale - 0.3, 1))} className="p-2.5 text-white hover:bg-white/20 rounded-lg transition-colors" title="Reduzir">
+                      <Icon path="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0113 10H7" />
+                    </button>
+                  </div>
+
+                  <div className="overflow-auto custom-scrollbar rounded-xl bg-[#1e1e1e] flex justify-center items-center" style={{ height: '70vh', maxHeight: '800px' }}>
+                    <div 
+                      className="relative flex-shrink-0 transition-transform duration-300 ease-out transform-gpu"
+                      style={{ 
+                        width: '100%', 
+                        maxWidth: '1000px',
+                        transform: `scale(${zoomScale})`,
+                        transformOrigin: 'center center'
+                      }}
+                    >
+                      <img 
+                        src={IMAGE_URL} 
+                        alt="Romaria Marítima" 
+                        className="w-full h-auto object-contain rounded-sm shadow-[inset_0_0_20px_rgba(0,0,0,0.8)]"
+                      />
+                      
+                      {/* Marcadores / Migalhas */}
+                      {crumbsPositions.map((crumb) => {
+                        const isAnswered = !!answers[crumb.number];
+                        const letter = answers[crumb.number];
+                        return (
+                          <button
+                            key={crumb.number}
+                            onClick={() => setActiveCrumb(crumb)}
+                            className={`absolute flex items-center justify-center font-bold shadow-xl transition-all duration-300
+                              ${isAnswered ? 'bg-emerald-500 text-white border-2 border-white scale-100' : 'bg-museum-gold text-white border-2 border-white animate-pulse-slow hover:scale-110'}`}
+                            style={{ 
+                              left: `${crumb.left}%`, 
+                              top: `${crumb.top}%`,
+                              transform: `translate(-50%, -50%) scale(${1 / zoomScale})`, 
+                              width: '36px',
+                              height: '36px',
+                              borderRadius: '50%',
+                              zIndex: isAnswered ? 10 : 15
+                            }}
+                          >
+                            {isAnswered ? letter : crumb.number}
+                            
+                            {!isAnswered && (
+                              <span className="absolute inset-0 rounded-full border-2 border-museum-gold animate-ping opacity-75"></span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Grelha de Acompanhamento (Checklist) */}
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                  <div className="bg-slate-50 border-b border-slate-200 px-6 py-4">
+                    <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                      <Icon path="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" className="w-5 h-5 text-museum-gold" />
+                      Painel de Respostas
+                    </h3>
+                  </div>
+                  <div className="p-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-11 gap-3">
+                      {crumbsPositions.map((crumb) => {
+                        const isAnswered = !!answers[crumb.number];
+                        return (
+                          <button
+                            key={crumb.number}
+                            onClick={() => setActiveCrumb(crumb)}
+                            className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all duration-200 ${
+                              isAnswered
+                                ? 'bg-emerald-50 border-emerald-200 text-emerald-800 shadow-sm'
+                                : 'bg-white border-slate-200 text-slate-500 hover:border-museum-gold hover:shadow-md'
+                            }`}
+                          >
+                            <span className="text-xs font-bold text-slate-400 mb-1">Ponto {crumb.number}</span>
+                            <span className={`text-lg font-black ${isAnswered ? 'text-emerald-600' : 'text-slate-300'}`}>
+                              {isAnswered ? answers[crumb.number] : '--'}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Botão Submeter */}
+                <div className="flex justify-center md:justify-end py-6">
+                  <button 
+                    onClick={handleSubmitQuiz}
+                    disabled={loading || progressCount < crumbsPositions.length}
+                    className={`px-8 py-4 rounded-xl font-bold text-lg flex items-center gap-3 transition-all duration-300 shadow-lg
+                      ${loading || progressCount < crumbsPositions.length 
+                        ? 'bg-slate-300 text-slate-500 cursor-not-allowed' 
+                        : 'bg-emerald-600 text-white hover:bg-emerald-700 hover:shadow-emerald-500/30 hover:-translate-y-1'}`}
+                  >
+                    {loading ? (
+                      <><div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> A Gravar...</>
+                    ) : (
+                      <><Icon path="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /> Submeter Análise</>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* MODAL DE ASSOCIAÇÃO */}
+            {activeCrumb && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 animate-fade-in">
+                {/* Backdrop */}
+                <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setActiveCrumb(null)}></div>
+                
+                {/* Modal Container */}
+                <div className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col relative z-10 animate-slide-up overflow-hidden border border-slate-200">
+                  
+                  {/* Modal Header */}
+                  <div className="bg-museum-900 text-white px-6 py-5 flex justify-between items-center relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-r from-museum-gold/20 to-transparent pointer-events-none"></div>
+                    <div className="relative z-10 flex items-center gap-4">
+                      <div className="bg-museum-gold w-12 h-12 rounded-full flex items-center justify-center font-bold text-xl shadow-inner border-2 border-white/20">
+                        {activeCrumb.number}
+                      </div>
+                      <div>
+                        <h4 className="text-xl font-serif font-bold">Associar Descrição</h4>
+                        <p className="text-slate-300 text-sm">Selecione o fragmento histórico correspondente a este ponto.</p>
+                      </div>
+                    </div>
+                    <button onClick={() => setActiveCrumb(null)} className="relative z-10 text-slate-300 hover:text-white p-2 rounded-full hover:bg-white/10 transition-colors">
+                      <Icon path="M6 18L18 6M6 6l12 12" />
+                    </button>
+                  </div>
+
+                  {/* Lista de Opções */}
+                  <div className="overflow-y-auto p-4 md:p-6 space-y-3 flex-grow custom-scrollbar bg-slate-50">
+                    {hints.map((hint) => {
+                      const alreadyUsedBy = Object.keys(answers).find(key => answers[key] === hint.letter);
+                      const isCurrentSelection = answers[activeCrumb.number] === hint.letter;
+                      const isUsedElsewhere = alreadyUsedBy && parseInt(alreadyUsedBy) !== activeCrumb.number;
+
+                      return (
+                        <button
+                          key={hint.letter}
+                          onClick={() => handleSelectAnswer(activeCrumb.number, hint.letter)}
+                          className={`w-full text-left p-4 rounded-2xl border-2 transition-all duration-200 flex gap-4 items-start group
+                            ${isCurrentSelection 
+                              ? 'bg-emerald-50 border-emerald-500 shadow-md transform scale-[1.01]' 
+                              : isUsedElsewhere 
+                                ? 'bg-white border-slate-200 opacity-60 hover:opacity-100 hover:border-museum-gold' 
+                                : 'bg-white border-transparent shadow-sm hover:shadow-md hover:border-museum-gold'}`}
+                        >
+                          <div className={`w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center font-bold text-lg border-2 transition-colors
+                            ${isCurrentSelection ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-slate-100 text-slate-600 border-slate-200 group-hover:bg-museum-gold group-hover:text-white group-hover:border-museum-gold'}`}>
+                            {hint.letter}
+                          </div>
+                          <div className="flex-grow pt-1">
+                            <p className={`text-base leading-relaxed ${isCurrentSelection ? 'text-emerald-900 font-medium' : 'text-slate-700'}`}>
+                              {hint.text}
+                            </p>
+                            {isUsedElsewhere && (
+                              <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-100 text-amber-800 text-xs font-bold border border-amber-200">
+                                <Icon path="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" className="w-3.5 h-3.5" />
+                                Em uso no Ponto {alreadyUsedBy} (clique para roubar)
+                              </div>
+                            )}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* VIEW: RESULTADOS */}
+            {view === 'result' && resultData && (
+              <div className="animate-fade-in space-y-8 max-w-5xl mx-auto">
+                
+                {/* Cartão de Pontuação */}
+                <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-200">
+                  <div className="bg-gradient-to-r from-museum-900 to-slate-800 p-8 md:p-12 text-center text-white relative">
+                    <div className="absolute top-0 right-0 p-8 opacity-10">
+                       <Icon path="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" className="w-48 h-48" />
+                    </div>
+                    
+                    <h2 className="text-4xl md:text-5xl font-serif font-bold mb-4 relative z-10">Desempenho da Análise</h2>
+                    <p className="text-xl text-slate-300 relative z-10 font-light">
+                      Pesquisador(a): <span className="font-bold text-white">{studentData.name}</span> <span className="opacity-50 mx-2">|</span> Turma: {studentData.classRoom}
+                    </p>
+                  </div>
+                  
+                  <div className="p-8 md:p-12 flex flex-col sm:flex-row justify-center items-center gap-8 md:gap-16 -mt-10 relative z-20">
+                    <div className="bg-white p-6 rounded-3xl shadow-2xl border-b-4 border-emerald-500 flex flex-col items-center min-w-[200px]">
+                      <span className="text-slate-500 font-bold uppercase tracking-wider text-sm mb-2">Acertos</span>
+                      <span className="text-6xl font-black text-emerald-500">{resultData.hitPercentage}%</span>
+                      <span className="text-emerald-700 font-medium mt-2 bg-emerald-100 px-3 py-1 rounded-full text-sm">
+                        {resultData.correctCount} de {resultData.total}
+                      </span>
+                    </div>
+                    <div className="bg-white p-6 rounded-3xl shadow-2xl border-b-4 border-red-500 flex flex-col items-center min-w-[200px]">
+                      <span className="text-slate-500 font-bold uppercase tracking-wider text-sm mb-2">Incorreções</span>
+                      <span className="text-6xl font-black text-red-500">{resultData.errorPercentage}%</span>
+                      <span className="text-red-700 font-medium mt-2 bg-red-100 px-3 py-1 rounded-full text-sm">
+                        {resultData.total - resultData.correctCount} erros
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-4">
+                  <h3 className="text-2xl font-serif font-bold text-museum-900 mb-6 flex items-center gap-3">
+                    <Icon path="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                    Relatório Detalhado
+                  </h3>
+                  
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                    {resultData.details.map((detail) => (
+                      <div key={detail.crumbNumber} className={`bg-white rounded-2xl p-5 md:p-6 shadow-sm border-l-8 transition-all hover:shadow-md ${detail.isCorrect ? 'border-l-emerald-500' : 'border-l-red-500'}`}>
+                        <div className="flex justify-between items-start mb-4">
+                          <h4 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <span className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm ${detail.isCorrect ? 'bg-emerald-500' : 'bg-red-500'}`}>
+                              {detail.crumbNumber}
+                            </span>
+                            Ponto na Pintura
+                          </h4>
+                          {detail.isCorrect ? (
+                            <div className="bg-emerald-100 text-emerald-700 p-1.5 rounded-full"><Icon path="M5 13l4 4L19 7" className="w-5 h-5" /></div>
+                          ) : (
+                            <div className="bg-red-100 text-red-700 p-1.5 rounded-full"><Icon path="M6 18L18 6M6 6l12 12" className="w-5 h-5" /></div>
+                          )}
+                        </div>
+                        
+                        <div className="flex flex-col gap-3">
+                          <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 flex justify-between items-center">
+                            <span className="text-sm text-slate-500 font-semibold uppercase">Sua Resposta:</span>
+                            <span className={`text-lg font-black ${detail.isCorrect ? 'text-emerald-600' : 'text-red-600'}`}>Letra {detail.userAnswer}</span>
+                          </div>
+                          {!detail.isCorrect && (
+                            <div className="bg-emerald-50/50 p-3 rounded-xl border border-emerald-100 flex justify-between items-center">
+                              <span className="text-sm text-emerald-800 font-semibold uppercase">Resposta Correta:</span>
+                              <span className="text-lg font-black text-emerald-600">Letra {detail.correctAnswer}</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {!detail.isCorrect && detail.studyTopic && (
+                          <div className="mt-4 bg-amber-50 p-4 rounded-xl border border-amber-200">
+                            <h5 className="font-bold text-xs text-amber-800 uppercase tracking-wide mb-1 flex items-center gap-1.5">
+                              <Icon path="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" className="w-4 h-4" />
+                              Recomendação de Estudo
+                            </h5>
+                            <p className="text-sm text-amber-900 leading-relaxed font-medium">{detail.studyTopic}</p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="text-center pt-8 pb-12">
+                  <button 
+                    onClick={() => { setAnswers({}); setView('quiz'); window.scrollTo(0,0); }}
+                    className="bg-museum-900 hover:bg-slate-800 text-white font-bold py-4 px-8 rounded-xl shadow-xl transition-transform hover:-translate-y-1 inline-flex items-center gap-2"
+                  >
+                    <Icon path="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    Refazer Análise
+                  </button>
+                </div>
+              </div>
+            )}
+
+          </main>
+        </div>
+      );
+    }
+
+    const container = document.getElementById('root');
+    const root = ReactDOM.createRoot(container);
+    root.render(<App />);
+  </script>
+</body>
+</html>
