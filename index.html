@@ -231,9 +231,9 @@
                             <i class="ph ph-sun absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg group-focus-within:text-primary transition-colors"></i>
                             <select id="input-turno" required class="w-full pl-11 pr-4 py-3 bg-slate-50/50 rounded-xl border border-slate-200 focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all appearance-none cursor-pointer shadow-inner">
                                 <option value="" disabled selected>Selecione</option>
-                                <option value="Matutino">Manhã</option>
-                                <option value="Vespertino">Tarde</option>
-                                <option value="Noturno">Noite</option>
+                                <option value="Manhã">Manhã</option>
+                                <option value="Tarde">Tarde</option>
+                                <option value="Noite">Noite</option>
                             </select>
                         </div>
                     </div>
@@ -708,7 +708,16 @@
         // Dashboard
         function initDashboard() {
             els.dash.lblNome.textContent = currentUser.nome;
-            els.dash.lblInfo.textContent = `${currentUser.turma} • ${currentUser.turno}`;
+
+            // Normalizar labels para exibição
+            const shiftMap = {
+                'Matutino': 'Manhã',
+                'Vespertino': 'Tarde',
+                'Noturno': 'Noite'
+            };
+            const displayTurno = shiftMap[currentUser.turno] || currentUser.turno;
+
+            els.dash.lblInfo.textContent = `${currentUser.turma} • ${displayTurno}`;
 
             els.dash.grid.innerHTML = '';
             Object.values(dbAtividades).forEach(act => {
