@@ -23,15 +23,15 @@
                             200: '#bfdbfe',
                             300: '#93c5fd',
                             400: '#60a5fa',
-                            500: '#3b82f6', // Azul primário mais moderno
+                            500: '#3b82f6', 
                             600: '#2563eb',
                             700: '#1d4ed8',
                             800: '#1e40af',
                             900: '#1e3a8a',
                         },
                         dark: {
-                            900: '#0B0F19', // Fundo sidebar
-                            800: '#151C2C', // Hover sidebar
+                            900: '#0B0F19', 
+                            800: '#151C2C', 
                         }
                     },
                     boxShadow: {
@@ -46,13 +46,11 @@
     <style>
         body { background-color: #F3F4F6; color: #1e293b; overflow: hidden; }
         
-        /* Scrollbar Premium */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-        /* Sidebar Item States */
         .sidebar-item { border-left: 3px solid transparent; }
         .sidebar-item.active { 
             background: linear-gradient(90deg, rgba(37, 99, 235, 0.1) 0%, transparent 100%);
@@ -60,10 +58,6 @@
             color: white; 
         }
 
-        /* Glassmorphism Cards */
-        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
-
-        /* Animations */
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         
@@ -74,7 +68,6 @@
         .stagger-2 { animation-delay: 0.2s; }
         .stagger-3 { animation-delay: 0.3s; }
 
-        /* Table Hover Glow */
         tr { transition: all 0.2s; }
         tr:hover td { background-color: #f8fafc; }
     </style>
@@ -82,7 +75,7 @@
 <body class="antialiased font-sans">
 
     <!-- TOAST NOTIFICATION CONTAINER -->
-    <div id="toast-container" class="fixed top-5 right-5 z-[200] flex flex-col gap-3"></div>
+    <div id="toast-container" class="fixed top-5 right-5 z-[200] flex flex-col gap-3 pointer-events-none"></div>
 
     <!-- LOGIN WALL -->
     <div id="login-wall" class="fixed inset-0 z-[100] flex items-center justify-center bg-dark-900">
@@ -130,7 +123,7 @@
                 <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4 ml-3">Menu Principal</p>
                 <nav class="space-y-1">
                     <button class="sidebar-item active w-full flex items-center gap-4 px-4 py-3.5 rounded-lg font-semibold transition-all hover:text-white" data-section="overview">
-                        <i class="ph ph-squares-four text-xl"></i> Visão Geral
+                        <i class="ph ph-squares-four text-xl"></i> Visão Geral & Gráficos
                     </button>
                     <button class="sidebar-item w-full flex items-center gap-4 px-4 py-3.5 rounded-lg font-semibold text-slate-400 hover:bg-dark-800 hover:text-white transition-all" data-section="submissions">
                         <i class="ph ph-users text-xl"></i> Alunos & Notas
@@ -138,7 +131,6 @@
                 </nav>
             </div>
 
-            <!-- User Profile (Bottom) -->
             <div class="mt-auto p-6 bg-dark-800/50 border-t border-white/5">
                 <div class="flex items-center gap-3 mb-4">
                     <img id="admin-photo" src="" alt="Perfil" class="w-10 h-10 rounded-full border-2 border-brand-500 shadow-glow object-cover">
@@ -159,8 +151,8 @@
             <!-- HEADER -->
             <header class="h-20 bg-white/80 backdrop-blur-xl border-b border-slate-200 flex items-center justify-between px-10 shrink-0 z-30">
                 <div>
-                    <h2 id="section-title" class="text-2xl font-black text-slate-800 tracking-tight">Visão Geral</h2>
-                    <p class="text-sm text-slate-500 font-medium mt-0.5">Acompanhe o desempenho das turmas em tempo real.</p>
+                    <h2 id="section-title" class="text-2xl font-black text-slate-800 tracking-tight">Análise de Desempenho</h2>
+                    <p class="text-sm text-slate-500 font-medium mt-0.5">Acompanhe métricas e dados das turmas em tempo real.</p>
                 </div>
 
                 <div class="flex items-center gap-4">
@@ -177,24 +169,52 @@
             </header>
 
             <!-- SECTIONS CONTAINER -->
-            <div class="flex-1 overflow-y-auto p-8 lg:p-10">
+            <div class="flex-1 overflow-y-auto p-8 lg:p-10 custom-scrollbar">
 
                 <!-- SECTION: OVERVIEW -->
                 <div id="section-overview" class="section space-y-8 pb-10">
 
+                    <!-- SMART INSIGHTS -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 animate-slide-up">
+                        <div class="bg-gradient-to-br from-brand-500 to-brand-700 p-6 rounded-2xl shadow-lg shadow-brand-500/20 text-white relative overflow-hidden">
+                            <i class="ph ph-trophy absolute -right-4 -bottom-4 text-9xl text-white/10"></i>
+                            <div class="relative z-10">
+                                <p class="text-brand-100 text-xs font-bold uppercase tracking-wider mb-1 flex items-center gap-2"><i class="ph ph-star-fill text-yellow-300"></i> Turma Destaque</p>
+                                <h3 id="insight-best-class" class="text-2xl font-black mb-1">---</h3>
+                                <p id="insight-best-class-avg" class="text-sm font-medium text-brand-100">Maior média geral</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-gradient-to-br from-rose-500 to-rose-700 p-6 rounded-2xl shadow-lg shadow-rose-500/20 text-white relative overflow-hidden">
+                            <i class="ph ph-warning-octagon absolute -right-4 -bottom-4 text-9xl text-white/10"></i>
+                            <div class="relative z-10">
+                                <p class="text-rose-100 text-xs font-bold uppercase tracking-wider mb-1 flex items-center gap-2"><i class="ph ph-warning-circle text-rose-200"></i> Ponto de Atenção</p>
+                                <h3 id="insight-worst-act" class="text-2xl font-black mb-1 truncate">---</h3>
+                                <p id="insight-worst-act-avg" class="text-sm font-medium text-rose-100">Atividade com menor média</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-gradient-to-br from-emerald-500 to-emerald-700 p-6 rounded-2xl shadow-lg shadow-emerald-500/20 text-white relative overflow-hidden">
+                            <i class="ph ph-trend-up absolute -right-4 -bottom-4 text-9xl text-white/10"></i>
+                            <div class="relative z-10">
+                                <p class="text-emerald-100 text-xs font-bold uppercase tracking-wider mb-1 flex items-center gap-2"><i class="ph ph-lightning text-yellow-300"></i> Pico de Entregas</p>
+                                <h3 id="insight-peak-day" class="text-2xl font-black mb-1">---</h3>
+                                <p id="insight-peak-day-count" class="text-sm font-medium text-emerald-100">Dia com mais respostas</p>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- BENTO GRID STATS -->
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <!-- Stat 1 -->
-                        <div class="bg-white p-6 rounded-2xl shadow-soft border border-slate-100 flex items-center gap-5 animate-slide-up">
-                            <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center shrink-0">
-                                <i class="ph ph-users-three text-3xl"></i>
+                        <div class="bg-white p-6 rounded-2xl shadow-soft border border-slate-100 flex items-center gap-5 animate-slide-up stagger-1">
+                            <div class="w-14 h-14 bg-slate-50 text-slate-600 border border-slate-100 rounded-2xl flex items-center justify-center shrink-0">
+                                <i class="ph ph-files text-3xl"></i>
                             </div>
                             <div>
                                 <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Total de Entregas</p>
                                 <h3 id="stat-total" class="text-3xl font-black text-slate-800 leading-none">0</h3>
                             </div>
                         </div>
-                        <!-- Stat 2 -->
                         <div class="bg-white p-6 rounded-2xl shadow-soft border border-slate-100 flex items-center gap-5 animate-slide-up stagger-1">
                             <div class="w-14 h-14 bg-brand-50 text-brand-600 rounded-2xl flex items-center justify-center shrink-0">
                                 <i class="ph ph-chart-polar text-3xl"></i>
@@ -207,18 +227,16 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- Stat 3 -->
-                        <div class="bg-white p-6 rounded-2xl shadow-soft border border-slate-100 flex items-center gap-5 animate-slide-up stagger-2">
+                        <div class="bg-white p-6 rounded-2xl shadow-soft border border-slate-100 flex items-center gap-5 animate-slide-up stagger-1">
                             <div class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center shrink-0">
-                                <i class="ph ph-trend-up text-3xl"></i>
+                                <i class="ph ph-check-circle text-3xl"></i>
                             </div>
                             <div>
-                                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Taxa Aprovação</p>
+                                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Taxa Aprovação (≥6)</p>
                                 <h3 id="stat-pass" class="text-3xl font-black text-slate-800 leading-none">0%</h3>
                             </div>
                         </div>
-                        <!-- Stat 4 -->
-                        <div class="bg-white p-6 rounded-2xl shadow-soft border border-slate-100 flex items-center gap-5 animate-slide-up stagger-3">
+                        <div class="bg-white p-6 rounded-2xl shadow-soft border border-slate-100 flex items-center gap-5 animate-slide-up stagger-1">
                             <div class="w-14 h-14 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center shrink-0">
                                 <i class="ph ph-clock-countdown text-3xl"></i>
                             </div>
@@ -229,32 +247,55 @@
                         </div>
                     </div>
 
-                    <!-- CHARTS -->
+                    <!-- MEGA CHARTS GRID -->
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-slide-up stagger-2">
+                        
+                        <!-- Timeline -->
                         <div class="lg:col-span-2 bg-white p-8 rounded-2xl shadow-soft border border-slate-100">
                             <div class="flex justify-between items-start mb-6">
                                 <div>
-                                    <h4 class="font-bold text-lg text-slate-800">Distribuição de Notas</h4>
-                                    <p class="text-sm text-slate-500">Desempenho agrupado por faixas de pontuação.</p>
+                                    <h4 class="font-bold text-lg text-slate-800"><i class="ph ph-trend-up text-brand-500 mr-2"></i>Evolução de Entregas</h4>
+                                    <p class="text-sm text-slate-500">Volume de atividades respondidas ao longo do tempo.</p>
                                 </div>
+                            </div>
+                            <div class="h-64 w-full"><canvas id="chart-timeline"></canvas></div>
+                        </div>
+
+                        <!-- Atividades -->
+                        <div class="bg-white p-8 rounded-2xl shadow-soft border border-slate-100">
+                            <div class="mb-6">
+                                <h4 class="font-bold text-lg text-slate-800"><i class="ph ph-chart-pie-slice text-brand-500 mr-2"></i>Por Atividade</h4>
+                                <p class="text-sm text-slate-500">Proporção de respostas enviadas.</p>
+                            </div>
+                            <div class="h-64 w-full relative flex items-center justify-center">
+                                <canvas id="chart-activities"></canvas>
+                                <div class="absolute flex flex-col items-center justify-center pointer-events-none">
+                                    <span id="chart-inner-total" class="text-2xl font-black text-slate-800">0</span>
+                                    <span class="text-[10px] font-bold text-slate-400 uppercase">Total</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ranking de Turmas -->
+                        <div class="lg:col-span-2 bg-white p-8 rounded-2xl shadow-soft border border-slate-100">
+                            <div class="flex justify-between items-start mb-6">
+                                <div>
+                                    <h4 class="font-bold text-lg text-slate-800"><i class="ph ph-ranking text-brand-500 mr-2"></i>Ranking de Turmas</h4>
+                                    <p class="text-sm text-slate-500">Média geral de desempenho comparada por turma.</p>
+                                </div>
+                            </div>
+                            <div class="h-72 w-full"><canvas id="chart-turmas"></canvas></div>
+                        </div>
+
+                        <!-- Distribuição Notas -->
+                        <div class="bg-white p-8 rounded-2xl shadow-soft border border-slate-100">
+                            <div class="mb-6">
+                                <h4 class="font-bold text-lg text-slate-800"><i class="ph ph-chart-bar text-brand-500 mr-2"></i>Faixas de Notas</h4>
+                                <p class="text-sm text-slate-500">Onde os alunos se concentram.</p>
                             </div>
                             <div class="h-72 w-full"><canvas id="chart-grades"></canvas></div>
                         </div>
 
-                        <div class="bg-white p-8 rounded-2xl shadow-soft border border-slate-100">
-                            <div class="mb-6">
-                                <h4 class="font-bold text-lg text-slate-800">Atividades</h4>
-                                <p class="text-sm text-slate-500">Proporção de respostas.</p>
-                            </div>
-                            <div class="h-60 w-full relative flex items-center justify-center">
-                                <canvas id="chart-activities"></canvas>
-                                <!-- Inner text for doughnut -->
-                                <div class="absolute flex flex-col items-center justify-center pointer-events-none">
-                                    <span id="chart-inner-total" class="text-2xl font-black text-slate-800">0</span>
-                                    <span class="text-xs font-bold text-slate-400 uppercase">Total</span>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
@@ -268,7 +309,7 @@
                             <input type="text" id="search-input" placeholder="Buscar aluno por nome..." class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm font-medium rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 block pl-12 pr-4 py-3 outline-none transition-all">
                         </div>
 
-                        <div class="flex items-center gap-3">
+                        <div class="flex flex-wrap items-center gap-3">
                             <div class="relative">
                                 <select id="filter-turma" class="appearance-none bg-slate-50 border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 block pl-4 pr-10 py-3 outline-none cursor-pointer transition-all">
                                     <option value="">Todas Turmas</option>
@@ -282,7 +323,7 @@
                                 <i class="ph ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
                             </div>
                             <button id="btn-export" class="flex items-center gap-2 px-5 py-3 bg-dark-900 hover:bg-dark-800 text-white rounded-xl font-bold text-sm transition-all shadow-md active:scale-95">
-                                <i class="ph ph-download-simple text-lg"></i> Exportar CSV
+                                <i class="ph ph-download-simple text-lg"></i> Exportar Dados
                             </button>
                         </div>
                     </div>
@@ -302,11 +343,10 @@
                                     </tr>
                                 </thead>
                                 <tbody id="table-body" class="divide-y divide-slate-100 text-sm">
-                                    <!-- Rows will be injected here via JS -->
                                     <tr>
                                         <td colspan="6" class="px-6 py-12 text-center text-slate-400 font-medium">
-                                            <i class="ph ph-empty text-4xl mb-2"></i>
-                                            <p>Nenhum dado encontrado.</p>
+                                            <i class="ph ph-files text-4xl mb-3 text-slate-300"></i>
+                                            <p>Nenhuma entrega encontrada.</p>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -320,13 +360,9 @@
 
     <!-- MODAL: DETALHES -->
     <div id="modal-details" class="fixed inset-0 bg-slate-900/40 z-[110] hidden flex justify-end backdrop-blur-sm transition-opacity">
-        <!-- Overlay clicável para fechar -->
         <div id="modal-overlay-bg" class="absolute inset-0"></div>
-        
-        <!-- Drawer Content -->
         <div class="relative w-full max-w-2xl bg-white h-full shadow-2xl flex flex-col animate-[slideInRight_0.3s_ease-out_forwards] border-l border-slate-200 overflow-hidden">
             
-            <!-- Modal Header -->
             <div class="p-8 border-b border-slate-100 bg-slate-50/50 flex justify-between items-start shrink-0">
                 <div class="flex items-center gap-5">
                     <img id="modal-student-avatar" src="" alt="Avatar" class="w-16 h-16 rounded-full border-4 border-white shadow-md">
@@ -344,10 +380,7 @@
                 </button>
             </div>
 
-            <!-- Modal Body -->
             <div class="flex-1 overflow-y-auto p-8 custom-scrollbar space-y-8 bg-white">
-                
-                <!-- Highlights -->
                 <div class="grid grid-cols-3 gap-4">
                     <div class="p-5 rounded-2xl border border-slate-100 bg-slate-50 text-center relative overflow-hidden">
                         <div class="absolute inset-0 bg-gradient-to-br from-brand-50 to-transparent opacity-50"></div>
@@ -366,16 +399,12 @@
                     </div>
                 </div>
 
-                <!-- Questions List -->
                 <div>
                     <h4 class="font-bold text-slate-800 text-sm mb-4 border-b border-slate-100 pb-2">Detalhes das Respostas</h4>
-                    <div id="modal-questions-list" class="space-y-3">
-                        <!-- Questions injected here -->
-                    </div>
+                    <div id="modal-questions-list" class="space-y-3"></div>
                 </div>
             </div>
 
-            <!-- Modal Footer -->
             <div class="p-6 bg-slate-50 border-t border-slate-200 shrink-0 flex justify-end gap-3">
                 <button id="btn-print" class="flex items-center gap-2 px-6 py-2.5 bg-white border border-slate-300 rounded-lg font-bold text-sm text-slate-700 hover:bg-slate-100 transition-all shadow-sm">
                     <i class="ph ph-printer text-lg"></i> Imprimir Boletim
@@ -384,7 +413,6 @@
         </div>
     </div>
 
-    <!-- Custom drawer animation -->
     <style>
         @keyframes slideInRight {
             from { transform: translateX(100%); }
@@ -397,7 +425,6 @@
         import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        // FIREBASE CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyALGqOB8GqjxhIhtxK0J_ZMTbBtYixEeiY",
             authDomain: "atividade-historia.firebaseapp.com",
@@ -418,8 +445,9 @@
         let allData = [];
         let chartGrades = null;
         let chartActivities = null;
+        let chartTimeline = null;
+        let chartTurmas = null;
 
-        // UI ELEMENTS
         const els = {
             loginWall: document.getElementById('login-wall'),
             btnLogin: document.getElementById('btn-login-google'),
@@ -447,6 +475,14 @@
                 pass: document.getElementById('stat-pass'),
                 time: document.getElementById('stat-time')
             },
+            insights: {
+                bestClass: document.getElementById('insight-best-class'),
+                bestClassAvg: document.getElementById('insight-best-class-avg'),
+                worstAct: document.getElementById('insight-worst-act'),
+                worstActAvg: document.getElementById('insight-worst-act-avg'),
+                peakDay: document.getElementById('insight-peak-day'),
+                peakDayCount: document.getElementById('insight-peak-day-count')
+            },
             modal: {
                 overlay: document.getElementById('modal-details'),
                 bg: document.getElementById('modal-overlay-bg'),
@@ -463,7 +499,6 @@
             }
         };
 
-        // TOAST NOTIFICATIONS
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -480,7 +515,7 @@
                 info: '<i class="ph ph-info-fill text-brand-500 text-xl"></i>'
             };
 
-            toast.className = `flex items-center gap-3 px-5 py-4 rounded-xl shadow-lg border border-slate-100 min-w-[300px] animate-[slideInRight_0.3s_ease-out_forwards] ${styles[type]}`;
+            toast.className = `flex items-center gap-3 px-5 py-4 rounded-xl shadow-lg border border-slate-100 min-w-[300px] animate-[slideInRight_0.3s_ease-out_forwards] pointer-events-auto ${styles[type]}`;
             toast.innerHTML = `${icons[type]} <span class="font-semibold text-sm">${message}</span>`;
             
             container.appendChild(toast);
@@ -525,7 +560,6 @@
             btn.addEventListener('click', () => {
                 const target = btn.dataset.section;
                 
-                // Update Sidebar Styles
                 els.sidebarItems.forEach(b => {
                     b.classList.remove('active', 'text-white');
                     b.classList.add('text-slate-400');
@@ -533,14 +567,12 @@
                 btn.classList.add('active', 'text-white');
                 btn.classList.remove('text-slate-400');
 
-                // Switch Sections
                 els.sections.forEach(s => s.classList.add('hidden'));
                 document.getElementById(`section-${target}`).classList.remove('hidden');
 
-                // Update Header
                 const titles = {
-                    'overview': { title: 'Visão Geral', sub: 'Acompanhe o desempenho das turmas em tempo real.' },
-                    'submissions': { title: 'Alunos & Notas', sub: 'Gerencie todas as entregas de atividades.' }
+                    'overview': { title: 'Análise de Desempenho', sub: 'Acompanhe métricas e dados das turmas em tempo real.' },
+                    'submissions': { title: 'Alunos & Notas', sub: 'Gerencie todas as entregas e exporte relatórios.' }
                 };
                 els.sectionTitle.textContent = titles[target].title;
                 els.sectionTitle.nextElementSibling.textContent = titles[target].sub;
@@ -570,6 +602,7 @@
             const filtered = applyFilters();
             renderTable(filtered);
             updateStats(filtered);
+            updateSmartInsights(filtered);
             updateCharts(filtered);
         }
 
@@ -600,6 +633,66 @@
             });
         }
 
+        // SMART INSIGHTS CALCULATION
+        function updateSmartInsights(data) {
+            if(!data.length) {
+                els.insights.bestClass.textContent = "---";
+                els.insights.worstAct.textContent = "---";
+                els.insights.peakDay.textContent = "---";
+                return;
+            }
+
+            const classData = {};
+            const actData = {};
+            const dayData = {};
+
+            data.forEach(d => {
+                // Class Logic
+                const t = `${d.turma} ${d.turno.charAt(0)}`;
+                if(!classData[t]) classData[t] = { count: 0, total: 0 };
+                classData[t].count++;
+                classData[t].total += d.notaFinal;
+
+                // Activity Logic
+                const a = d.atividade;
+                if(!actData[a]) actData[a] = { count: 0, total: 0 };
+                actData[a].count++;
+                actData[a].total += d.notaFinal;
+
+                // Day Logic
+                const date = new Date(d.dataRealizacao).toLocaleDateString('pt-BR');
+                dayData[date] = (dayData[date] || 0) + 1;
+            });
+
+            // Find Best Class
+            let bestC = { name: "---", avg: 0 };
+            for(const [k, v] of Object.entries(classData)) {
+                if(v.count >= 3) { // min 3 submissions to count
+                    const avg = v.total / v.count;
+                    if(avg > bestC.avg) bestC = { name: k, avg };
+                }
+            }
+            els.insights.bestClass.textContent = bestC.name !== "---" ? bestC.name : "N/A";
+            els.insights.bestClassAvg.textContent = bestC.name !== "---" ? `Média de ${bestC.avg.toFixed(1)}` : "Poucos dados";
+
+            // Find Worst Activity
+            let worstA = { name: "---", avg: 11 };
+            for(const [k, v] of Object.entries(actData)) {
+                const avg = v.total / v.count;
+                if(avg < worstA.avg) worstA = { name: k, avg };
+            }
+            els.insights.worstAct.textContent = worstA.name !== "---" ? worstA.name : "N/A";
+            els.insights.worstActAvg.textContent = worstA.name !== "---" ? `Média baixa: ${worstA.avg.toFixed(1)}` : "Poucos dados";
+
+            // Find Peak Day
+            let peakD = { date: "---", count: 0 };
+            for(const [k, v] of Object.entries(dayData)) {
+                if(v > peakD.count) peakD = { date: k, count: v };
+            }
+            els.insights.peakDay.textContent = peakD.date.substring(0, 5); // Ex: 15/04
+            els.insights.peakDayCount.textContent = `${peakD.count} respostas enviadas`;
+        }
+
         // TABLE RENDER
         function renderTable(data) {
             els.tableBody.innerHTML = '';
@@ -620,10 +713,8 @@
                 const dateStr = dateObj.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
                 const timeStr = dateObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
                 
-                // Get nice UI Avatar
                 const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(item.nome)}&background=f1f5f9&color=475569&bold=true&rounded=true`;
 
-                // Badge Colors
                 let gradeBadge = 'bg-rose-100 text-rose-700 border-rose-200';
                 if(item.notaFinal >= 8) gradeBadge = 'bg-emerald-100 text-emerald-700 border-emerald-200';
                 else if(item.notaFinal >= 5) gradeBadge = 'bg-amber-100 text-amber-700 border-amber-200';
@@ -707,62 +798,72 @@
         Chart.defaults.color = '#64748b';
 
         function updateCharts(data) {
-            const gradeBuckets = [0, 0, 0, 0, 0]; // 0-2, 2-4, 4-6, 6-8, 8-10
+            const gradeBuckets = [0, 0, 0, 0, 0];
             const activityCount = {};
+            const timelineMap = {};
+            const turmaMap = {};
 
             data.forEach(d => {
+                // Grades Data
                 let idx = Math.floor(d.notaFinal / 2);
-                if(idx === 5) idx = 4; // Max out 10 at the last bucket
+                if(idx === 5) idx = 4;
                 gradeBuckets[idx]++;
+                
+                // Activities Data
                 activityCount[d.atividade] = (activityCount[d.atividade] || 0) + 1;
+
+                // Timeline Data
+                const dateKey = new Date(d.dataRealizacao).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+                timelineMap[dateKey] = (timelineMap[dateKey] || 0) + 1;
+
+                // Turmas Data
+                const tName = `${d.turma} ${d.turno.charAt(0)}`;
+                if(!turmaMap[tName]) turmaMap[tName] = { score: 0, count: 0 };
+                turmaMap[tName].score += d.notaFinal;
+                turmaMap[tName].count++;
             });
 
-            // Update Total Inner text
+            // Prepare Timeline Data (Sorted)
+            const timelineLabels = Object.keys(timelineMap).reverse(); // Reverse because original data was reversed
+            const timelineData = Object.values(timelineMap).reverse();
+
+            // Prepare Turmas Data (Averages)
+            const turmasLabels = [];
+            const turmasData = [];
+            Object.entries(turmaMap).sort((a,b) => (b[1].score/b[1].count) - (a[1].score/a[1].count)).forEach(([k,v]) => {
+                turmasLabels.push(k);
+                turmasData.push((v.score / v.count).toFixed(1));
+            });
+
             document.getElementById('chart-inner-total').textContent = data.length;
 
-            // Bar Chart Setup
+            // 1. Chart Grades (Bar)
             const ctxGrades = document.getElementById('chart-grades').getContext('2d');
-            const gradientBlue = ctxGrades.createLinearGradient(0, 0, 0, 400);
-            gradientBlue.addColorStop(0, 'rgba(59, 130, 246, 0.8)'); // brand-500
-            gradientBlue.addColorStop(1, 'rgba(59, 130, 246, 0.2)');
+            const grad1 = ctxGrades.createLinearGradient(0, 0, 0, 400);
+            grad1.addColorStop(0, 'rgba(59, 130, 246, 0.8)');
+            grad1.addColorStop(1, 'rgba(59, 130, 246, 0.2)');
 
             if(chartGrades) chartGrades.destroy();
             chartGrades = new Chart(ctxGrades, {
                 type: 'bar',
                 data: {
-                    labels: ['0 a 2.0', '2.1 a 4.0', '4.1 a 6.0', '6.1 a 8.0', '8.1 a 10'],
+                    labels: ['0-2', '2.1-4', '4.1-6', '6.1-8', '8.1-10'],
                     datasets: [{
-                        label: 'Nº de Alunos',
                         data: gradeBuckets,
-                        backgroundColor: gradientBlue,
+                        backgroundColor: grad1,
                         hoverBackgroundColor: '#2563eb',
-                        borderRadius: 8,
-                        borderSkipped: false,
-                        barThickness: 32
+                        borderRadius: 6,
+                        barThickness: 24
                     }]
                 },
                 options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false, 
-                    plugins: { 
-                        legend: { display: false },
-                        tooltip: {
-                            backgroundColor: '#1e293b',
-                            padding: 12,
-                            titleFont: { size: 13, family: 'Plus Jakarta Sans' },
-                            bodyFont: { size: 14, weight: 'bold' },
-                            displayColors: false,
-                            callbacks: { label: (ctx) => `${ctx.raw} alunos` }
-                        }
-                    }, 
-                    scales: { 
-                        y: { beginAtZero: true, grid: { color: '#f1f5f9', drawBorder: false }, ticks: { stepSize: 1 } }, 
-                        x: { grid: { display: false, drawBorder: false } } 
-                    } 
+                    responsive: true, maintainAspectRatio: false, 
+                    plugins: { legend: { display: false } }, 
+                    scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9', drawBorder: false }, ticks: { stepSize: 1 } }, x: { grid: { display: false } } } 
                 }
             });
 
-            // Doughnut Chart Setup
+            // 2. Chart Activities (Doughnut)
             if(chartActivities) chartActivities.destroy();
             chartActivities = new Chart(document.getElementById('chart-activities'), {
                 type: 'doughnut',
@@ -771,23 +872,64 @@
                     datasets: [{
                         data: Object.values(activityCount),
                         backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#64748b'],
-                        borderWidth: 2,
-                        borderColor: '#ffffff',
-                        hoverOffset: 4
+                        borderWidth: 2, borderColor: '#ffffff', hoverOffset: 4
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false } } }
+            });
+
+            // 3. Chart Timeline (Line)
+            const ctxTime = document.getElementById('chart-timeline').getContext('2d');
+            const gradTime = ctxTime.createLinearGradient(0, 0, 0, 300);
+            gradTime.addColorStop(0, 'rgba(16, 185, 129, 0.3)');
+            gradTime.addColorStop(1, 'rgba(16, 185, 129, 0)');
+
+            if(chartTimeline) chartTimeline.destroy();
+            chartTimeline = new Chart(ctxTime, {
+                type: 'line',
+                data: {
+                    labels: timelineLabels,
+                    datasets: [{
+                        label: 'Entregas',
+                        data: timelineData,
+                        borderColor: '#10b981',
+                        backgroundColor: gradTime,
+                        borderWidth: 3,
+                        pointBackgroundColor: '#ffffff',
+                        pointBorderColor: '#10b981',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        fill: true,
+                        tension: 0.4 // Curves the line
                     }]
                 },
                 options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false, 
-                    cutout: '75%', 
-                    plugins: { 
-                        legend: { display: false }, // Esconde legenda padrão para visual mais limpo
-                        tooltip: {
-                            backgroundColor: '#1e293b',
-                            padding: 12,
-                            bodyFont: { size: 14, weight: 'bold' },
-                        }
-                    } 
+                    responsive: true, maintainAspectRatio: false, 
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { stepSize: 1 } }, x: { grid: { display: false } } }
+                }
+            });
+
+            // 4. Chart Turmas (Horizontal Bar)
+            if(chartTurmas) chartTurmas.destroy();
+            chartTurmas = new Chart(document.getElementById('chart-turmas'), {
+                type: 'bar',
+                data: {
+                    labels: turmasLabels,
+                    datasets: [{
+                        label: 'Média',
+                        data: turmasData,
+                        backgroundColor: '#8b5cf6',
+                        hoverBackgroundColor: '#7c3aed',
+                        borderRadius: 6,
+                        barThickness: 20
+                    }]
+                },
+                options: { 
+                    indexAxis: 'y', // Makes it horizontal
+                    responsive: true, maintainAspectRatio: false, 
+                    plugins: { legend: { display: false } },
+                    scales: { x: { beginAtZero: true, max: 10, grid: { color: '#f1f5f9' } }, y: { grid: { display: false } } }
                 }
             });
         }
@@ -814,7 +956,7 @@
             showToast("Relatório exportado com sucesso!", "success");
         });
 
-        // GLOBAL ACTIONS (Exposed to window for inline onclick)
+        // GLOBAL ACTIONS
         window.deleteRecord = (id, name) => {
             if(confirm(`⚠️ Atenção!\nTem certeza que deseja excluir os dados do aluno(a) ${name}?\nEsta ação não pode ser desfeita.`)) {
                 remove(ref(db, `Respostas/${id}`))
@@ -827,19 +969,16 @@
             const item = allData.find(d => d.id === id);
             if(!item) return;
 
-            // Populate Header
             els.modal.avatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(item.nome)}&background=f1f5f9&color=475569&bold=true&size=128`;
             els.modal.name.textContent = item.nome;
             els.modal.turma.textContent = `${item.turma} ${item.turno.charAt(0)}`;
             els.modal.act.textContent = `${item.atividade} - ${item.tituloAtividade}`;
             
-            // Populate Stats
             els.modal.score.textContent = item.notaFinal.toFixed(1);
             els.modal.score.className = `text-3xl font-black relative z-10 ${item.notaFinal >= 6 ? 'text-emerald-600' : 'text-rose-600'}`;
             els.modal.hits.textContent = `${item.totalAcertos}/${item.totalQuestoes}`;
             els.modal.time.textContent = item.tempoFormatado;
 
-            // Populate Questions
             els.modal.list.innerHTML = '';
             Object.entries(item.questoes).sort((a,b) => parseInt(a[0].replace('q','')) - parseInt(b[0].replace('q',''))).forEach(([qId, q]) => {
                 const isRight = q.status === "Correto";
@@ -865,11 +1004,9 @@
                 els.modal.list.appendChild(div);
             });
 
-            // Show Modal
             els.modal.overlay.classList.remove('hidden');
         };
 
-        // EVENT LISTENERS
         els.modal.btnClose.addEventListener('click', () => els.modal.overlay.classList.add('hidden'));
         els.modal.bg.addEventListener('click', () => els.modal.overlay.classList.add('hidden'));
         
@@ -882,9 +1019,7 @@
         els.filterTurma.addEventListener('change', updateUI);
         els.filterAtividade.addEventListener('change', updateUI);
 
-        els.modal.btnPrint.addEventListener('click', () => {
-            window.print();
-        });
+        els.modal.btnPrint.addEventListener('click', () => window.print());
 
     </script>
 </body>
