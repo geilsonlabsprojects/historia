@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Admin - Portal de História</title>
+    <title>HistóriaLab - Dashboard de Controle</title>
 
     <!-- Scripts & Styles -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -18,16 +18,25 @@
                     fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
                     colors: {
                         brand: {
-                            50: '#f5f3ff',
-                            100: '#ede9fe',
-                            200: '#ddd6fe',
-                            500: '#8b5cf6',
-                            600: '#7c3aed',
-                            700: '#6d28d9',
-                            900: '#4c1d95'
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6', // Azul primário mais moderno
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
                         },
-                        surface: '#f8fafc',
-                        dark: '#0f172a'
+                        dark: {
+                            900: '#0B0F19', // Fundo sidebar
+                            800: '#151C2C', // Hover sidebar
+                        }
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'glow': '0 0 20px rgba(59, 130, 246, 0.5)',
                     }
                 }
             }
@@ -35,198 +44,271 @@
     </script>
 
     <style>
-        body { background-color: #f8fafc; color: #1e293b; }
-        .sidebar-item.active { background: #8b5cf6; color: white; box-shadow: 0 10px 15px -3px rgba(139, 92, 246, 0.3); }
-        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.4); }
-        .card-shadow { box-shadow: 0 0 50px -12px rgba(0, 0, 0, 0.05); }
-        .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
+        body { background-color: #F3F4F6; color: #1e293b; overflow: hidden; }
+        
+        /* Scrollbar Premium */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Sidebar Item States */
+        .sidebar-item { border-left: 3px solid transparent; }
+        .sidebar-item.active { 
+            background: linear-gradient(90deg, rgba(37, 99, 235, 0.1) 0%, transparent 100%);
+            border-left-color: #3b82f6; 
+            color: white; 
+        }
+
+        /* Glassmorphism Cards */
+        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
 
         /* Animations */
-        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-in { animation: slideIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+        .animate-slide-up { animation: slideUp 0.5s ease-out forwards; }
+        
+        .stagger-1 { animation-delay: 0.1s; }
+        .stagger-2 { animation-delay: 0.2s; }
+        .stagger-3 { animation-delay: 0.3s; }
+
+        /* Table Hover Glow */
+        tr { transition: all 0.2s; }
+        tr:hover td { background-color: #f8fafc; }
     </style>
 </head>
 <body class="antialiased font-sans">
 
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toast-container" class="fixed top-5 right-5 z-[200] flex flex-col gap-3"></div>
+
     <!-- LOGIN WALL -->
-    <div id="login-wall" class="fixed inset-0 bg-dark z-[100] flex items-center justify-center p-4">
-        <!-- Background Decor -->
+    <div id="login-wall" class="fixed inset-0 z-[100] flex items-center justify-center bg-dark-900">
         <div class="absolute inset-0 overflow-hidden">
-            <div class="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-brand-500/20 rounded-full blur-[120px]"></div>
-            <div class="absolute -bottom-[10%] -right-[10%] w-[40%] h-[40%] bg-brand-500/20 rounded-full blur-[120px]"></div>
+            <div class="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-brand-600/20 rounded-full blur-[150px]"></div>
+            <div class="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-purple-600/20 rounded-full blur-[150px]"></div>
+            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
         </div>
 
-        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
-
-        <div class="w-full max-w-md bg-white/90 backdrop-blur-xl rounded-[3rem] p-10 shadow-2xl relative z-10 text-center border border-white/40 animate-in">
+        <div class="relative z-10 w-full max-w-md p-10 bg-white/10 backdrop-blur-2xl rounded-3xl border border-white/10 shadow-2xl animate-slide-up text-center">
             <div class="mb-8 relative inline-block">
                 <div class="absolute inset-0 bg-brand-500/20 blur-2xl rounded-full scale-150"></div>
-                <img src="https://i.ibb.co/Df0wxYjb/Design-sem-nome-5-removebg-preview.png" alt="Logo da Escola" class="h-32 object-contain relative z-10 drop-shadow-2xl hover:scale-110 transition-transform duration-500">
+                <div class="relative z-10 bg-white p-5 rounded-[2rem] shadow-2xl inline-block hover:scale-110 transition-transform duration-500 border border-white/50">
+                    <img src="https://i.ibb.co/Df0wxYjb/Design-sem-nome-5-removebg-preview.png" alt="Logo da Escola" class="h-20 w-20 object-contain">
+                </div>
             </div>
+            
+            <h1 class="text-3xl font-black text-white mb-2 tracking-tight">História<span class="text-brand-400">Lab</span></h1>
+            <p class="text-slate-400 text-sm mb-10">Acesso restrito à coordenação e professores.</p>
 
-            <h1 class="text-3xl font-black text-dark mb-2 tracking-tight">Portal <span class="text-brand-600">Admin</span></h1>
-            <p class="text-slate-500 text-sm mb-10 leading-relaxed font-medium">Bem-vindo ao centro de controle. Entre com sua conta institucional para gerenciar os estudos.</p>
-
-            <button id="btn-login-google" class="w-full flex items-center justify-center gap-4 bg-white hover:bg-slate-50 text-dark font-black py-5 px-6 rounded-[1.5rem] border-2 border-slate-100 shadow-xl shadow-brand-900/5 transition-all active:scale-95 group">
-                <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-6 h-6" alt="Google">
-                <span>Continuar com Google</span>
+            <button id="btn-login-google" class="w-full flex items-center justify-center gap-3 bg-white hover:bg-slate-50 text-dark-900 font-bold py-4 px-6 rounded-xl transition-all hover:scale-[1.02] active:scale-95 shadow-lg">
+                <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" alt="Google">
+                <span>Acessar com Google</span>
             </button>
 
-            <p id="auth-error" class="text-red-500 text-xs font-bold mt-6 hidden bg-red-50 py-3 rounded-xl animate-pulse">Acesso negado para este e-mail.</p>
+            <div id="auth-error" class="hidden mt-6 bg-red-500/10 border border-red-500/20 text-red-400 text-sm py-3 rounded-xl flex items-center justify-center gap-2">
+                <i class="ph ph-warning-circle text-lg"></i> Acesso não autorizado.
+            </div>
         </div>
     </div>
 
     <!-- APP LAYOUT -->
-    <div id="admin-dashboard" class="hidden flex h-screen overflow-hidden">
+    <div id="admin-dashboard" class="hidden flex h-screen w-full bg-[#F3F4F6]">
 
         <!-- SIDEBAR -->
-        <aside class="w-72 bg-white border-r border-slate-100 flex flex-col shrink-0 z-40">
+        <aside class="w-72 bg-dark-900 text-slate-300 flex flex-col shrink-0 z-40 border-r border-white/5 relative">
             <div class="p-8">
-                <div class="flex items-center gap-4 mb-10">
-                    <img src="https://i.ibb.co/Df0wxYjb/Design-sem-nome-5-removebg-preview.png" alt="Logo" class="h-10 w-10 object-contain">
-                    <span class="font-black text-xl tracking-tight text-dark">História<span class="text-brand-500">Lab</span></span>
+                <div class="flex items-center gap-3 mb-10">
+                    <div class="bg-white p-1.5 rounded-xl shadow-sm">
+                        <img src="https://i.ibb.co/Df0wxYjb/Design-sem-nome-5-removebg-preview.png" alt="Logo da Escola" class="h-8 w-8 object-contain">
+                    </div>
+                    <span class="font-black text-2xl tracking-tight text-white">História<span class="text-brand-500">Lab</span></span>
                 </div>
 
-                <nav class="space-y-2">
-                    <button class="sidebar-item active w-full flex items-center gap-3 px-5 py-3.5 rounded-2xl font-bold transition-all" data-section="overview">
-                        <i class="ph ph-squares-four-fill text-xl"></i> Overview
+                <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4 ml-3">Menu Principal</p>
+                <nav class="space-y-1">
+                    <button class="sidebar-item active w-full flex items-center gap-4 px-4 py-3.5 rounded-lg font-semibold transition-all hover:text-white" data-section="overview">
+                        <i class="ph ph-squares-four text-xl"></i> Visão Geral
                     </button>
-                    <button class="sidebar-item w-full flex items-center gap-3 px-5 py-3.5 rounded-2xl font-bold text-slate-400 hover:bg-slate-50 hover:text-dark transition-all" data-section="submissions">
-                        <i class="ph ph-table-fill text-xl"></i> Submissões
+                    <button class="sidebar-item w-full flex items-center gap-4 px-4 py-3.5 rounded-lg font-semibold text-slate-400 hover:bg-dark-800 hover:text-white transition-all" data-section="submissions">
+                        <i class="ph ph-users text-xl"></i> Alunos & Notas
                     </button>
                 </nav>
             </div>
 
-            <div class="mt-auto p-6 border-t border-slate-50 bg-slate-50/50">
-                <div class="flex items-center gap-3 mb-6">
-                    <img id="admin-photo" src="" alt="Perfil" class="w-10 h-10 rounded-xl border-2 border-white shadow-sm object-cover">
-                    <div class="overflow-hidden">
-                        <input type="text" id="admin-display-name" class="font-bold text-sm text-dark bg-transparent border-none outline-none w-full truncate focus:text-brand-600" placeholder="Seu Nome">
-                        <p id="admin-email" class="text-[10px] text-slate-400 font-bold uppercase truncate">email@admin.com</p>
+            <!-- User Profile (Bottom) -->
+            <div class="mt-auto p-6 bg-dark-800/50 border-t border-white/5">
+                <div class="flex items-center gap-3 mb-4">
+                    <img id="admin-photo" src="" alt="Perfil" class="w-10 h-10 rounded-full border-2 border-brand-500 shadow-glow object-cover">
+                    <div class="overflow-hidden flex-1">
+                        <p id="admin-display-name" class="font-bold text-sm text-white truncate">Nome Admin</p>
+                        <p id="admin-email" class="text-xs text-slate-500 truncate">admin@escola.com</p>
                     </div>
                 </div>
-                <button id="btn-logout-admin" class="w-full flex items-center justify-center gap-2 py-3 bg-white hover:bg-red-50 text-red-500 border border-red-100 rounded-xl font-bold text-sm transition-all">
-                    <i class="ph ph-sign-out text-lg"></i> Sair do Painel
+                <button id="btn-logout-admin" class="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-all border border-transparent hover:border-red-500/20">
+                    <i class="ph ph-sign-out text-lg"></i> Encerrar Sessão
                 </button>
             </div>
         </aside>
 
         <!-- MAIN CONTENT -->
-        <main class="flex-1 flex flex-col overflow-hidden relative">
-
+        <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
+            
             <!-- HEADER -->
-            <header class="h-20 bg-white/80 backdrop-blur-md border-b border-slate-100 flex items-center justify-between px-10 sticky top-0 z-30">
-                <h2 id="section-title" class="text-xl font-black text-dark tracking-tight">Overview do Sistema</h2>
+            <header class="h-20 bg-white/80 backdrop-blur-xl border-b border-slate-200 flex items-center justify-between px-10 shrink-0 z-30">
+                <div>
+                    <h2 id="section-title" class="text-2xl font-black text-slate-800 tracking-tight">Visão Geral</h2>
+                    <p class="text-sm text-slate-500 font-medium mt-0.5">Acompanhe o desempenho das turmas em tempo real.</p>
+                </div>
 
                 <div class="flex items-center gap-4">
-                    <div id="last-updated" class="hidden sm:flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-4 py-2 rounded-full border border-slate-100">
-                        <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span> Atualizado Agora
+                    <div id="loading-indicator" class="hidden items-center gap-2 text-brand-600 bg-brand-50 px-4 py-2 rounded-full text-sm font-bold border border-brand-100">
+                        <i class="ph ph-spinner-gap animate-spin text-lg"></i> Sincronizando...
                     </div>
-                    <button id="btn-refresh" class="w-10 h-10 flex items-center justify-center bg-white border border-slate-200 rounded-xl text-slate-500 hover:text-brand-500 hover:border-brand-200 transition-all shadow-sm">
-                        <i class="ph ph-arrows-clockwise font-bold"></i>
+                    <div class="flex items-center gap-2 text-xs font-bold text-slate-500 bg-slate-100 px-4 py-2 rounded-full border border-slate-200">
+                        <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.6)]"></span> Online
+                    </div>
+                    <button id="btn-refresh" class="w-10 h-10 flex items-center justify-center bg-white border border-slate-200 rounded-full text-slate-600 hover:text-brand-600 hover:border-brand-300 hover:shadow-md transition-all">
+                        <i class="ph ph-arrows-clockwise font-bold text-lg"></i>
                     </button>
                 </div>
             </header>
 
-            <!-- SECTIONS -->
-            <div class="flex-1 overflow-y-auto custom-scrollbar p-10 bg-surface">
+            <!-- SECTIONS CONTAINER -->
+            <div class="flex-1 overflow-y-auto p-8 lg:p-10">
 
                 <!-- SECTION: OVERVIEW -->
-                <div id="section-overview" class="section animate-in space-y-10">
+                <div id="section-overview" class="section space-y-8 pb-10">
 
-                    <!-- KEY STATS -->
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                        <div class="bg-white p-6 rounded-[2rem] card-shadow border border-slate-50 flex items-center gap-4">
-                            <div class="w-14 h-14 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center"><i class="ph ph-users-three-fill text-2xl"></i></div>
+                    <!-- BENTO GRID STATS -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <!-- Stat 1 -->
+                        <div class="bg-white p-6 rounded-2xl shadow-soft border border-slate-100 flex items-center gap-5 animate-slide-up">
+                            <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center shrink-0">
+                                <i class="ph ph-users-three text-3xl"></i>
+                            </div>
                             <div>
-                                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Alunos Ativos</p>
-                                <h3 id="stat-total" class="text-3xl font-black text-dark">0</h3>
+                                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Total de Entregas</p>
+                                <h3 id="stat-total" class="text-3xl font-black text-slate-800 leading-none">0</h3>
                             </div>
                         </div>
-                        <div class="bg-white p-6 rounded-[2rem] card-shadow border border-slate-50 flex items-center gap-4">
-                            <div class="w-14 h-14 bg-brand-50 text-brand-500 rounded-2xl flex items-center justify-center"><i class="ph ph-chart-line-up-fill text-2xl"></i></div>
+                        <!-- Stat 2 -->
+                        <div class="bg-white p-6 rounded-2xl shadow-soft border border-slate-100 flex items-center gap-5 animate-slide-up stagger-1">
+                            <div class="w-14 h-14 bg-brand-50 text-brand-600 rounded-2xl flex items-center justify-center shrink-0">
+                                <i class="ph ph-chart-polar text-3xl"></i>
+                            </div>
                             <div>
-                                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Média Geral</p>
-                                <h3 id="stat-avg" class="text-3xl font-black text-brand-600">0.0</h3>
+                                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Média Geral</p>
+                                <div class="flex items-baseline gap-2">
+                                    <h3 id="stat-avg" class="text-3xl font-black text-slate-800 leading-none">0.0</h3>
+                                    <span class="text-sm font-bold text-slate-400">/ 10</span>
+                                </div>
                             </div>
                         </div>
-                        <div class="bg-white p-6 rounded-[2rem] card-shadow border border-slate-50 flex items-center gap-4">
-                            <div class="w-14 h-14 bg-emerald-50 text-emerald-500 rounded-2xl flex items-center justify-center"><i class="ph ph-shield-check-fill text-2xl"></i></div>
+                        <!-- Stat 3 -->
+                        <div class="bg-white p-6 rounded-2xl shadow-soft border border-slate-100 flex items-center gap-5 animate-slide-up stagger-2">
+                            <div class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center shrink-0">
+                                <i class="ph ph-trend-up text-3xl"></i>
+                            </div>
                             <div>
-                                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Aprovação</p>
-                                <h3 id="stat-pass" class="text-3xl font-black text-emerald-600">0%</h3>
+                                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Taxa Aprovação</p>
+                                <h3 id="stat-pass" class="text-3xl font-black text-slate-800 leading-none">0%</h3>
                             </div>
                         </div>
-                        <div class="bg-white p-6 rounded-[2rem] card-shadow border border-slate-50 flex items-center gap-4">
-                            <div class="w-14 h-14 bg-amber-50 text-amber-500 rounded-2xl flex items-center justify-center"><i class="ph ph-timer-fill text-2xl"></i></div>
+                        <!-- Stat 4 -->
+                        <div class="bg-white p-6 rounded-2xl shadow-soft border border-slate-100 flex items-center gap-5 animate-slide-up stagger-3">
+                            <div class="w-14 h-14 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center shrink-0">
+                                <i class="ph ph-clock-countdown text-3xl"></i>
+                            </div>
                             <div>
-                                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Tempo Médio</p>
-                                <h3 id="stat-time" class="text-3xl font-black text-slate-700">00:00</h3>
+                                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Tempo Médio</p>
+                                <h3 id="stat-time" class="text-3xl font-black text-slate-800 leading-none">00:00</h3>
                             </div>
                         </div>
                     </div>
 
-                    <!-- CHARTS GRID -->
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        <div class="bg-white p-8 rounded-[2.5rem] card-shadow border border-slate-50">
-                            <div class="flex items-center justify-between mb-8">
-                                <h4 class="font-black text-dark tracking-tight">Distribuição de Notas</h4>
-                                <i class="ph ph-info text-slate-300"></i>
+                    <!-- CHARTS -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-slide-up stagger-2">
+                        <div class="lg:col-span-2 bg-white p-8 rounded-2xl shadow-soft border border-slate-100">
+                            <div class="flex justify-between items-start mb-6">
+                                <div>
+                                    <h4 class="font-bold text-lg text-slate-800">Distribuição de Notas</h4>
+                                    <p class="text-sm text-slate-500">Desempenho agrupado por faixas de pontuação.</p>
+                                </div>
                             </div>
-                            <div class="h-64"><canvas id="chart-grades"></canvas></div>
+                            <div class="h-72 w-full"><canvas id="chart-grades"></canvas></div>
                         </div>
-                        <div class="bg-white p-8 rounded-[2.5rem] card-shadow border border-slate-50">
-                            <div class="flex items-center justify-between mb-8">
-                                <h4 class="font-black text-dark tracking-tight">Participação por Atividade</h4>
-                                <i class="ph ph-info text-slate-300"></i>
+
+                        <div class="bg-white p-8 rounded-2xl shadow-soft border border-slate-100">
+                            <div class="mb-6">
+                                <h4 class="font-bold text-lg text-slate-800">Atividades</h4>
+                                <p class="text-sm text-slate-500">Proporção de respostas.</p>
                             </div>
-                            <div class="h-64"><canvas id="chart-activities"></canvas></div>
+                            <div class="h-60 w-full relative flex items-center justify-center">
+                                <canvas id="chart-activities"></canvas>
+                                <!-- Inner text for doughnut -->
+                                <div class="absolute flex flex-col items-center justify-center pointer-events-none">
+                                    <span id="chart-inner-total" class="text-2xl font-black text-slate-800">0</span>
+                                    <span class="text-xs font-bold text-slate-400 uppercase">Total</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- SECTION: SUBMISSIONS -->
-                <div id="section-submissions" class="section hidden animate-in space-y-8">
+                <div id="section-submissions" class="section hidden space-y-6 pb-10">
 
-                    <!-- TOOLBAR -->
-                    <div class="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center justify-between bg-white p-6 rounded-[2rem] card-shadow border border-slate-50">
-                        <div class="flex flex-1 items-center gap-3 px-6 py-3 bg-slate-50 rounded-2xl border border-slate-100 focus-within:ring-2 focus-within:ring-brand-500/20 transition-all">
-                            <i class="ph ph-magnifying-glass text-slate-400 text-lg"></i>
-                            <input type="text" id="search-input" placeholder="Buscar por aluno ou turma..." class="bg-transparent outline-none text-sm font-semibold w-full">
+                    <!-- FILTERS & SEARCH -->
+                    <div class="flex flex-col lg:flex-row gap-4 justify-between bg-white p-4 rounded-2xl shadow-soft border border-slate-100 animate-slide-up">
+                        <div class="relative flex-1 max-w-md">
+                            <i class="ph ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl"></i>
+                            <input type="text" id="search-input" placeholder="Buscar aluno por nome..." class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm font-medium rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 block pl-12 pr-4 py-3 outline-none transition-all">
                         </div>
 
                         <div class="flex items-center gap-3">
-                            <select id="filter-turma" class="bg-white border border-slate-200 px-4 py-3 rounded-2xl text-sm font-bold text-slate-600 outline-none hover:border-brand-500 transition-all cursor-pointer">
-                                <option value="">Todas as Turmas</option>
-                            </select>
-                            <select id="filter-atividade" class="bg-white border border-slate-200 px-4 py-3 rounded-2xl text-sm font-bold text-slate-600 outline-none hover:border-brand-500 transition-all cursor-pointer">
-                                <option value="">Todas Atividades</option>
-                            </select>
-                            <button id="btn-export" class="flex items-center gap-2 px-6 py-3 bg-dark text-white rounded-2xl font-black text-sm hover:bg-brand-600 transition-all shadow-lg shadow-dark/10">
-                                <i class="ph ph-file-csv-fill text-xl"></i> Exportar
+                            <div class="relative">
+                                <select id="filter-turma" class="appearance-none bg-slate-50 border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 block pl-4 pr-10 py-3 outline-none cursor-pointer transition-all">
+                                    <option value="">Todas Turmas</option>
+                                </select>
+                                <i class="ph ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                            </div>
+                            <div class="relative">
+                                <select id="filter-atividade" class="appearance-none bg-slate-50 border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 block pl-4 pr-10 py-3 outline-none cursor-pointer transition-all">
+                                    <option value="">Todas Atividades</option>
+                                </select>
+                                <i class="ph ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                            </div>
+                            <button id="btn-export" class="flex items-center gap-2 px-5 py-3 bg-dark-900 hover:bg-dark-800 text-white rounded-xl font-bold text-sm transition-all shadow-md active:scale-95">
+                                <i class="ph ph-download-simple text-lg"></i> Exportar CSV
                             </button>
                         </div>
                     </div>
 
                     <!-- TABLE -->
-                    <div class="bg-white rounded-[2.5rem] card-shadow border border-slate-50 overflow-hidden">
-                        <div class="overflow-x-auto custom-scrollbar">
-                            <table class="w-full text-left">
+                    <div class="bg-white rounded-2xl shadow-soft border border-slate-100 overflow-hidden animate-slide-up stagger-1">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
                                 <thead>
-                                    <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50">
-                                        <th class="px-10 py-6">Data</th>
-                                        <th class="px-10 py-6">Aluno</th>
-                                        <th class="px-10 py-6">Turma</th>
-                                        <th class="px-10 py-6">Atividade</th>
-                                        <th class="px-10 py-6 text-center">Nota</th>
-                                        <th class="px-10 py-6 text-right">Ações</th>
+                                    <tr class="bg-slate-50/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">
+                                        <th class="px-6 py-5 whitespace-nowrap">Aluno</th>
+                                        <th class="px-6 py-5 whitespace-nowrap">Turma</th>
+                                        <th class="px-6 py-5 whitespace-nowrap">Atividade</th>
+                                        <th class="px-6 py-5 whitespace-nowrap">Data</th>
+                                        <th class="px-6 py-5 whitespace-nowrap text-center">Nota</th>
+                                        <th class="px-6 py-5 whitespace-nowrap text-right">Ações</th>
                                     </tr>
                                 </thead>
-                                <tbody id="table-body" class="divide-y divide-slate-50">
-                                    <!-- Rows injected here -->
+                                <tbody id="table-body" class="divide-y divide-slate-100 text-sm">
+                                    <!-- Rows will be injected here via JS -->
+                                    <tr>
+                                        <td colspan="6" class="px-6 py-12 text-center text-slate-400 font-medium">
+                                            <i class="ph ph-empty text-4xl mb-2"></i>
+                                            <p>Nenhum dado encontrado.</p>
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -237,61 +319,85 @@
     </div>
 
     <!-- MODAL: DETALHES -->
-    <div id="modal-details" class="fixed inset-0 bg-dark/60 z-[110] hidden flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-4xl rounded-[3rem] shadow-2xl overflow-hidden max-h-[90vh] flex flex-col animate-in">
-            <div class="p-10 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
-                <div class="flex items-center gap-6">
-                    <div class="w-16 h-16 bg-white rounded-[1.5rem] flex items-center justify-center text-brand-500 shadow-sm border border-slate-100">
-                        <i class="ph ph-student-fill text-4xl"></i>
-                    </div>
+    <div id="modal-details" class="fixed inset-0 bg-slate-900/40 z-[110] hidden flex justify-end backdrop-blur-sm transition-opacity">
+        <!-- Overlay clicável para fechar -->
+        <div id="modal-overlay-bg" class="absolute inset-0"></div>
+        
+        <!-- Drawer Content -->
+        <div class="relative w-full max-w-2xl bg-white h-full shadow-2xl flex flex-col animate-[slideInRight_0.3s_ease-out_forwards] border-l border-slate-200 overflow-hidden">
+            
+            <!-- Modal Header -->
+            <div class="p-8 border-b border-slate-100 bg-slate-50/50 flex justify-between items-start shrink-0">
+                <div class="flex items-center gap-5">
+                    <img id="modal-student-avatar" src="" alt="Avatar" class="w-16 h-16 rounded-full border-4 border-white shadow-md">
                     <div>
-                        <h3 id="modal-student-name" class="font-black text-dark text-2xl mb-1">Nome do Aluno</h3>
-                        <p id="modal-activity-title" class="text-xs text-slate-400 font-bold uppercase tracking-widest">Atividade ID</p>
+                        <h3 id="modal-student-name" class="font-black text-slate-800 text-2xl mb-1">Nome do Aluno</h3>
+                        <div class="flex gap-2 items-center">
+                            <span id="modal-student-class" class="text-xs font-bold text-brand-600 bg-brand-50 px-2 py-1 rounded-md">Turma</span>
+                            <span class="text-slate-300">•</span>
+                            <span id="modal-activity-title" class="text-xs text-slate-500 font-semibold truncate max-w-[200px]">Atividade ID</span>
+                        </div>
                     </div>
                 </div>
-                <button id="btn-close-modal" class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-slate-400 hover:text-red-500 shadow-sm border border-slate-100 transition-all">
-                    <i class="ph ph-x text-2xl font-bold"></i>
+                <button id="btn-close-modal" class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 shadow-sm border border-slate-200 transition-all">
+                    <i class="ph ph-x text-xl font-bold"></i>
                 </button>
             </div>
 
-            <div class="flex-1 overflow-y-auto p-10 custom-scrollbar space-y-10">
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                    <div class="bg-brand-50/50 p-6 rounded-[2rem] border border-brand-100/50">
-                        <p class="text-[10px] font-black text-brand-400 uppercase mb-2 tracking-widest">Nota Final</p>
-                        <p id="modal-score" class="text-4xl font-black text-brand-600">0.0</p>
+            <!-- Modal Body -->
+            <div class="flex-1 overflow-y-auto p-8 custom-scrollbar space-y-8 bg-white">
+                
+                <!-- Highlights -->
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="p-5 rounded-2xl border border-slate-100 bg-slate-50 text-center relative overflow-hidden">
+                        <div class="absolute inset-0 bg-gradient-to-br from-brand-50 to-transparent opacity-50"></div>
+                        <p class="text-[10px] font-bold text-slate-500 uppercase mb-1 relative z-10">Nota Final</p>
+                        <p id="modal-score" class="text-3xl font-black text-slate-800 relative z-10">0.0</p>
                     </div>
-                    <div class="bg-emerald-50/50 p-6 rounded-[2rem] border border-emerald-100/50">
-                        <p class="text-[10px] font-black text-emerald-400 uppercase mb-2 tracking-widest">Pontuação</p>
-                        <p id="modal-hits" class="text-4xl font-black text-emerald-600">0</p>
+                    <div class="p-5 rounded-2xl border border-slate-100 bg-slate-50 text-center relative overflow-hidden">
+                        <div class="absolute inset-0 bg-gradient-to-br from-emerald-50 to-transparent opacity-50"></div>
+                        <p class="text-[10px] font-bold text-slate-500 uppercase mb-1 relative z-10">Acertos</p>
+                        <p id="modal-hits" class="text-3xl font-black text-slate-800 relative z-10">0/0</p>
                     </div>
-                    <div class="bg-slate-50 p-6 rounded-[2rem] border border-slate-100">
-                        <p class="text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest">Duração</p>
-                        <p id="modal-time" class="text-4xl font-black text-slate-700">00:00</p>
+                    <div class="p-5 rounded-2xl border border-slate-100 bg-slate-50 text-center relative overflow-hidden">
+                        <div class="absolute inset-0 bg-gradient-to-br from-amber-50 to-transparent opacity-50"></div>
+                        <p class="text-[10px] font-bold text-slate-500 uppercase mb-1 relative z-10">Tempo</p>
+                        <p id="modal-time" class="text-3xl font-black text-slate-800 relative z-10">00:00</p>
                     </div>
                 </div>
 
-                <div class="space-y-4">
-                    <h4 class="font-black text-dark text-xs uppercase tracking-widest flex items-center gap-3">
-                        <span class="w-8 h-1 bg-brand-500 rounded-full"></span> Detalhes da Análise
-                    </h4>
-                    <div id="modal-questions-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                <!-- Questions List -->
+                <div>
+                    <h4 class="font-bold text-slate-800 text-sm mb-4 border-b border-slate-100 pb-2">Detalhes das Respostas</h4>
+                    <div id="modal-questions-list" class="space-y-3">
+                        <!-- Questions injected here -->
+                    </div>
                 </div>
             </div>
 
-            <div class="p-8 bg-slate-50/80 border-t border-slate-50 flex justify-end gap-3">
-                <button onclick="window.print()" class="flex items-center gap-2 px-8 py-4 bg-white border border-slate-200 rounded-2xl font-black text-sm text-dark hover:bg-slate-50 transition-all shadow-sm">
-                    <i class="ph ph-printer-fill text-xl"></i> Imprimir
+            <!-- Modal Footer -->
+            <div class="p-6 bg-slate-50 border-t border-slate-200 shrink-0 flex justify-end gap-3">
+                <button id="btn-print" class="flex items-center gap-2 px-6 py-2.5 bg-white border border-slate-300 rounded-lg font-bold text-sm text-slate-700 hover:bg-slate-100 transition-all shadow-sm">
+                    <i class="ph ph-printer text-lg"></i> Imprimir Boletim
                 </button>
             </div>
         </div>
     </div>
+
+    <!-- Custom drawer animation -->
+    <style>
+        @keyframes slideInRight {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+    </style>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        // CONFIG
+        // FIREBASE CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyALGqOB8GqjxhIhtxK0J_ZMTbBtYixEeiY",
             authDomain: "atividade-historia.firebaseapp.com",
@@ -313,7 +419,7 @@
         let chartGrades = null;
         let chartActivities = null;
 
-        // SELECTORS
+        // UI ELEMENTS
         const els = {
             loginWall: document.getElementById('login-wall'),
             btnLogin: document.getElementById('btn-login-google'),
@@ -323,6 +429,7 @@
             searchInput: document.getElementById('search-input'),
             btnRefresh: document.getElementById('btn-refresh'),
             btnLogout: document.getElementById('btn-logout-admin'),
+            loadingIndicator: document.getElementById('loading-indicator'),
             sections: document.querySelectorAll('.section'),
             sidebarItems: document.querySelectorAll('.sidebar-item'),
             sectionTitle: document.getElementById('section-title'),
@@ -342,18 +449,54 @@
             },
             modal: {
                 overlay: document.getElementById('modal-details'),
+                bg: document.getElementById('modal-overlay-bg'),
                 btnClose: document.getElementById('btn-close-modal'),
+                avatar: document.getElementById('modal-student-avatar'),
                 name: document.getElementById('modal-student-name'),
+                turma: document.getElementById('modal-student-class'),
                 act: document.getElementById('modal-activity-title'),
                 score: document.getElementById('modal-score'),
                 hits: document.getElementById('modal-hits'),
                 time: document.getElementById('modal-time'),
-                list: document.getElementById('modal-questions-list')
+                list: document.getElementById('modal-questions-list'),
+                btnPrint: document.getElementById('btn-print')
             }
         };
 
-        // AUTH LOGIC
-        els.btnLogin.addEventListener('click', () => signInWithPopup(auth, provider));
+        // TOAST NOTIFICATIONS
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const styles = {
+                success: 'bg-white border-l-4 border-emerald-500 text-slate-800',
+                error: 'bg-white border-l-4 border-red-500 text-slate-800',
+                info: 'bg-white border-l-4 border-brand-500 text-slate-800'
+            };
+            
+            const icons = {
+                success: '<i class="ph ph-check-circle-fill text-emerald-500 text-xl"></i>',
+                error: '<i class="ph ph-warning-circle-fill text-red-500 text-xl"></i>',
+                info: '<i class="ph ph-info-fill text-brand-500 text-xl"></i>'
+            };
+
+            toast.className = `flex items-center gap-3 px-5 py-4 rounded-xl shadow-lg border border-slate-100 min-w-[300px] animate-[slideInRight_0.3s_ease-out_forwards] ${styles[type]}`;
+            toast.innerHTML = `${icons[type]} <span class="font-semibold text-sm">${message}</span>`;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                toast.style.transition = 'all 0.3s ease-in';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // AUTH
+        els.btnLogin.addEventListener('click', () => {
+            signInWithPopup(auth, provider).catch(err => showToast("Erro no login", "error"));
+        });
 
         onAuthStateChanged(auth, (user) => {
             if (user && ALLOWED_EMAILS.includes(user.email)) {
@@ -361,7 +504,8 @@
                 els.dashboard.classList.remove('hidden');
                 els.adminInfo.photo.src = user.photoURL;
                 els.adminInfo.email.textContent = user.email;
-                els.adminInfo.name.value = localStorage.getItem('admin_name') || user.displayName;
+                els.adminInfo.name.textContent = user.displayName;
+                showToast(`Bem-vindo, ${user.displayName.split(' ')[0]}!`, 'info');
                 fetchData();
             } else if (user) {
                 signOut(auth);
@@ -372,30 +516,53 @@
             }
         });
 
-        els.btnLogout.addEventListener('click', () => confirm("Sair do painel?") && signOut(auth));
-        els.adminInfo.name.addEventListener('change', (e) => localStorage.setItem('admin_name', e.target.value));
+        els.btnLogout.addEventListener('click', () => {
+            if(confirm("Deseja realmente sair?")) signOut(auth);
+        });
 
         // NAVIGATION
         els.sidebarItems.forEach(btn => {
             btn.addEventListener('click', () => {
                 const target = btn.dataset.section;
-                els.sidebarItems.forEach(b => b.classList.remove('active', 'text-slate-400'));
-                btn.classList.add('active');
+                
+                // Update Sidebar Styles
+                els.sidebarItems.forEach(b => {
+                    b.classList.remove('active', 'text-white');
+                    b.classList.add('text-slate-400');
+                });
+                btn.classList.add('active', 'text-white');
+                btn.classList.remove('text-slate-400');
 
+                // Switch Sections
                 els.sections.forEach(s => s.classList.add('hidden'));
                 document.getElementById(`section-${target}`).classList.remove('hidden');
 
-                els.sectionTitle.textContent = target === 'overview' ? 'Overview do Sistema' : 'Histórico de Submissões';
+                // Update Header
+                const titles = {
+                    'overview': { title: 'Visão Geral', sub: 'Acompanhe o desempenho das turmas em tempo real.' },
+                    'submissions': { title: 'Alunos & Notas', sub: 'Gerencie todas as entregas de atividades.' }
+                };
+                els.sectionTitle.textContent = titles[target].title;
+                els.sectionTitle.nextElementSibling.textContent = titles[target].sub;
             });
         });
 
         // DATA LOGIC
         function fetchData() {
+            els.loadingIndicator.classList.remove('hidden');
+            els.loadingIndicator.classList.add('flex');
+            
             onValue(ref(db, 'Respostas'), (snapshot) => {
                 const data = snapshot.val();
                 allData = data ? Object.entries(data).map(([k, v]) => ({ id: k, ...v })).reverse() : [];
                 updateUI();
                 populateFilters();
+                
+                els.loadingIndicator.classList.add('hidden');
+                els.loadingIndicator.classList.remove('flex');
+            }, (error) => {
+                showToast("Erro ao carregar dados", "error");
+                els.loadingIndicator.classList.add('hidden');
             });
         }
 
@@ -410,8 +577,14 @@
             const turmas = [...new Set(allData.map(d => `${d.turma} • ${d.turno}`))].sort();
             const atividades = [...new Set(allData.map(d => d.atividade))].sort();
 
-            els.filterTurma.innerHTML = '<option value="">Todas as Turmas</option>' + turmas.map(t => `<option value="${t}">${t}</option>`).join('');
+            const currentTurma = els.filterTurma.value;
+            const currentAtividade = els.filterAtividade.value;
+
+            els.filterTurma.innerHTML = '<option value="">Todas Turmas</option>' + turmas.map(t => `<option value="${t}">${t}</option>`).join('');
             els.filterAtividade.innerHTML = '<option value="">Todas Atividades</option>' + atividades.map(a => `<option value="${a}">${a}</option>`).join('');
+
+            els.filterTurma.value = currentTurma;
+            els.filterAtividade.value = currentAtividade;
         }
 
         function applyFilters() {
@@ -420,43 +593,79 @@
             const atividade = els.filterAtividade.value;
 
             return allData.filter(d => {
-                const matchSearch = d.nome.toLowerCase().includes(term) || d.turma.toLowerCase().includes(term);
+                const matchSearch = d.nome.toLowerCase().includes(term);
                 const matchTurma = !turma || `${d.turma} • ${d.turno}` === turma;
                 const matchAtividade = !atividade || d.atividade === atividade;
                 return matchSearch && matchTurma && matchAtividade;
             });
         }
 
+        // TABLE RENDER
         function renderTable(data) {
             els.tableBody.innerHTML = '';
-            data.forEach(item => {
-                const date = new Date(item.dataRealizacao).toLocaleDateString('pt-BR');
-                const hour = new Date(item.dataRealizacao).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            
+            if (data.length === 0) {
+                els.tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="px-6 py-12 text-center text-slate-400 font-medium">
+                            <i class="ph ph-files text-4xl mb-3 text-slate-300"></i>
+                            <p>Nenhuma entrega encontrada.</p>
+                        </td>
+                    </tr>`;
+                return;
+            }
+
+            data.forEach((item, index) => {
+                const dateObj = new Date(item.dataRealizacao);
+                const dateStr = dateObj.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+                const timeStr = dateObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                
+                // Get nice UI Avatar
+                const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(item.nome)}&background=f1f5f9&color=475569&bold=true&rounded=true`;
+
+                // Badge Colors
+                let gradeBadge = 'bg-rose-100 text-rose-700 border-rose-200';
+                if(item.notaFinal >= 8) gradeBadge = 'bg-emerald-100 text-emerald-700 border-emerald-200';
+                else if(item.notaFinal >= 5) gradeBadge = 'bg-amber-100 text-amber-700 border-amber-200';
 
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 transition-all group";
+                tr.className = `hover:bg-slate-50 transition-colors border-b border-slate-50 ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`;
                 tr.innerHTML = `
-                    <td class="px-10 py-6">
-                        <p class="font-bold text-dark text-sm">${date}</p>
-                        <p class="text-[10px] text-slate-400 font-bold uppercase">${hour}</p>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <img src="${avatarUrl}" alt="${item.nome}" class="w-10 h-10 rounded-full border border-slate-200 shadow-sm">
+                            <div>
+                                <p class="font-bold text-slate-800 text-sm">${item.nome}</p>
+                                <p class="text-[11px] text-slate-400 font-medium uppercase tracking-wider">ID: ${item.id.slice(-6)}</p>
+                            </div>
+                        </div>
                     </td>
-                    <td class="px-10 py-6 font-extrabold text-dark">${item.nome}</td>
-                    <td class="px-10 py-6 text-sm text-slate-500 font-bold">${item.turma} • ${item.turno}</td>
-                    <td class="px-10 py-6">
-                        <span class="text-xs font-black text-brand-500 bg-brand-50 px-3 py-1 rounded-lg border border-brand-100 uppercase">${item.atividade}</span>
+                    <td class="px-6 py-4">
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200">
+                            <i class="ph ph-users-three"></i> ${item.turma} ${item.turno.charAt(0)}
+                        </span>
                     </td>
-                    <td class="px-10 py-6 text-center">
-                        <span class="inline-flex items-center justify-center w-10 h-10 rounded-xl font-black ${getGradeColor(item.notaFinal)}">
+                    <td class="px-6 py-4">
+                        <span class="text-xs font-bold text-brand-700 bg-brand-50 px-2.5 py-1 rounded-md border border-brand-100 truncate max-w-[150px] inline-block">
+                            ${item.atividade}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <p class="font-semibold text-slate-700 text-sm">${dateStr}</p>
+                        <p class="text-[11px] text-slate-400 font-medium">${timeStr}</p>
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        <span class="inline-flex items-center justify-center w-12 h-8 rounded-lg font-black text-sm border shadow-sm ${gradeBadge}">
                             ${item.notaFinal.toFixed(1)}
                         </span>
                     </td>
-                    <td class="px-10 py-6 text-right">
+                    <td class="px-6 py-4 text-right">
                         <div class="flex items-center justify-end gap-2">
-                            <button onclick="window.openDetail('${item.id}')" class="p-2.5 bg-white border border-slate-200 rounded-xl text-brand-500 hover:bg-brand-500 hover:text-white transition-all shadow-sm">
-                                <i class="ph ph-eye-fill text-lg"></i>
+                            <button onclick="window.openDetail('${item.id}')" class="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-lg text-slate-500 hover:text-brand-600 hover:border-brand-300 transition-all shadow-sm group" title="Ver Detalhes">
+                                <i class="ph ph-eye text-lg group-hover:scale-110 transition-transform"></i>
                             </button>
-                            <button onclick="window.deleteRecord('${item.id}', '${item.nome}')" class="p-2.5 bg-white border border-slate-200 rounded-xl text-red-400 hover:bg-red-500 hover:text-white transition-all shadow-sm">
-                                <i class="ph ph-trash-fill text-lg"></i>
+                            <button onclick="window.deleteRecord('${item.id}', '${item.nome}')" class="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-lg text-slate-500 hover:text-red-500 hover:border-red-300 hover:bg-red-50 transition-all shadow-sm group" title="Excluir">
+                                <i class="ph ph-trash text-lg group-hover:scale-110 transition-transform"></i>
                             </button>
                         </div>
                     </td>
@@ -465,12 +674,7 @@
             });
         }
 
-        function getGradeColor(n) {
-            if(n >= 8) return 'bg-emerald-100 text-emerald-700 border border-emerald-200';
-            if(n >= 5) return 'bg-amber-100 text-amber-700 border border-amber-200';
-            return 'bg-red-100 text-red-700 border border-red-200';
-        }
-
+        // STATS CALCULATION
         function updateStats(data) {
             const count = data.length;
             if(!count) return resetStats();
@@ -495,37 +699,70 @@
         function formatTime(s) {
             const m = Math.floor(s/60).toString().padStart(2,'0');
             const sec = (s%60).toString().padStart(2,'0');
-            return `${m}:${sec}`;
+            return `${m}m ${sec}s`;
         }
 
-        // CHARTS
+        // CHARTS CONFIGURATION
+        Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
+        Chart.defaults.color = '#64748b';
+
         function updateCharts(data) {
             const gradeBuckets = [0, 0, 0, 0, 0]; // 0-2, 2-4, 4-6, 6-8, 8-10
             const activityCount = {};
 
             data.forEach(d => {
-                const idx = Math.min(Math.floor(d.notaFinal / 2), 4);
+                let idx = Math.floor(d.notaFinal / 2);
+                if(idx === 5) idx = 4; // Max out 10 at the last bucket
                 gradeBuckets[idx]++;
                 activityCount[d.atividade] = (activityCount[d.atividade] || 0) + 1;
             });
 
-            // Grades Chart
+            // Update Total Inner text
+            document.getElementById('chart-inner-total').textContent = data.length;
+
+            // Bar Chart Setup
+            const ctxGrades = document.getElementById('chart-grades').getContext('2d');
+            const gradientBlue = ctxGrades.createLinearGradient(0, 0, 0, 400);
+            gradientBlue.addColorStop(0, 'rgba(59, 130, 246, 0.8)'); // brand-500
+            gradientBlue.addColorStop(1, 'rgba(59, 130, 246, 0.2)');
+
             if(chartGrades) chartGrades.destroy();
-            chartGrades = new Chart(document.getElementById('chart-grades'), {
+            chartGrades = new Chart(ctxGrades, {
                 type: 'bar',
                 data: {
-                    labels: ['0-2', '2-4', '4-6', '6-8', '8-10'],
+                    labels: ['0 a 2.0', '2.1 a 4.0', '4.1 a 6.0', '6.1 a 8.0', '8.1 a 10'],
                     datasets: [{
-                        label: 'Alunos',
+                        label: 'Nº de Alunos',
                         data: gradeBuckets,
-                        backgroundColor: '#8b5cf6',
-                        borderRadius: 12
+                        backgroundColor: gradientBlue,
+                        hoverBackgroundColor: '#2563eb',
+                        borderRadius: 8,
+                        borderSkipped: false,
+                        barThickness: 32
                     }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } } }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#1e293b',
+                            padding: 12,
+                            titleFont: { size: 13, family: 'Plus Jakarta Sans' },
+                            bodyFont: { size: 14, weight: 'bold' },
+                            displayColors: false,
+                            callbacks: { label: (ctx) => `${ctx.raw} alunos` }
+                        }
+                    }, 
+                    scales: { 
+                        y: { beginAtZero: true, grid: { color: '#f1f5f9', drawBorder: false }, ticks: { stepSize: 1 } }, 
+                        x: { grid: { display: false, drawBorder: false } } 
+                    } 
+                }
             });
 
-            // Activities Chart
+            // Doughnut Chart Setup
             if(chartActivities) chartActivities.destroy();
             chartActivities = new Chart(document.getElementById('chart-activities'), {
                 type: 'doughnut',
@@ -533,36 +770,56 @@
                     labels: Object.keys(activityCount),
                     datasets: [{
                         data: Object.values(activityCount),
-                        backgroundColor: ['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b'],
-                        borderWidth: 0
+                        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#64748b'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff',
+                        hoverOffset: 4
                     }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom' } } }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    cutout: '75%', 
+                    plugins: { 
+                        legend: { display: false }, // Esconde legenda padrão para visual mais limpo
+                        tooltip: {
+                            backgroundColor: '#1e293b',
+                            padding: 12,
+                            bodyFont: { size: 14, weight: 'bold' },
+                        }
+                    } 
+                }
             });
         }
 
-        // EXPORT
+        // EXPORT CSV
         els.btnExport.addEventListener('click', () => {
             const filtered = applyFilters();
-            if(!filtered.length) return alert("Nada para exportar.");
+            if(!filtered.length) {
+                showToast("Não há dados para exportar.", "info");
+                return;
+            }
 
-            let csv = "Data,Aluno,Turma,Turno,Atividade,Nota,Tempo\n";
+            let csv = "Data de Realizacao,Aluno,Turma,Turno,Atividade,Nota Final,Tempo Gasto,Acertos\n";
             filtered.forEach(d => {
-                const date = new Date(d.dataRealizacao).toLocaleDateString();
-                csv += `"${date}","${d.nome}","${d.turma}","${d.turno}","${d.atividade}",${d.notaFinal},"${d.tempoFormatado}"\n`;
+                const date = new Date(d.dataRealizacao).toLocaleString('pt-BR');
+                csv += `"${date}","${d.nome}","${d.turma}","${d.turno}","${d.atividade}",${d.notaFinal},"${d.tempoFormatado}",${d.totalAcertos}/${d.totalQuestoes}\n`;
             });
 
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.download = `relatorio_onhb_${new Date().toISOString().split('T')[0]}.csv`;
+            link.download = `Relatorio_HistoriaLab_${new Date().getTime()}.csv`;
             link.click();
+            showToast("Relatório exportado com sucesso!", "success");
         });
 
-        // GLOBAL ACTIONS
+        // GLOBAL ACTIONS (Exposed to window for inline onclick)
         window.deleteRecord = (id, name) => {
-            if(confirm(`Excluir permanentemente os dados de "${name}"?`)) {
-                remove(ref(db, `Respostas/${id}`));
+            if(confirm(`⚠️ Atenção!\nTem certeza que deseja excluir os dados do aluno(a) ${name}?\nEsta ação não pode ser desfeita.`)) {
+                remove(ref(db, `Respostas/${id}`))
+                    .then(() => showToast("Registro removido com sucesso.", "success"))
+                    .catch(() => showToast("Erro ao remover registro.", "error"));
             }
         };
 
@@ -570,40 +827,64 @@
             const item = allData.find(d => d.id === id);
             if(!item) return;
 
+            // Populate Header
+            els.modal.avatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(item.nome)}&background=f1f5f9&color=475569&bold=true&size=128`;
             els.modal.name.textContent = item.nome;
-            els.modal.act.textContent = `${item.atividade} / ${item.tituloAtividade}`;
+            els.modal.turma.textContent = `${item.turma} ${item.turno.charAt(0)}`;
+            els.modal.act.textContent = `${item.atividade} - ${item.tituloAtividade}`;
+            
+            // Populate Stats
             els.modal.score.textContent = item.notaFinal.toFixed(1);
+            els.modal.score.className = `text-3xl font-black relative z-10 ${item.notaFinal >= 6 ? 'text-emerald-600' : 'text-rose-600'}`;
             els.modal.hits.textContent = `${item.totalAcertos}/${item.totalQuestoes}`;
             els.modal.time.textContent = item.tempoFormatado;
 
+            // Populate Questions
             els.modal.list.innerHTML = '';
             Object.entries(item.questoes).sort((a,b) => parseInt(a[0].replace('q','')) - parseInt(b[0].replace('q',''))).forEach(([qId, q]) => {
                 const isRight = q.status === "Correto";
                 const div = document.createElement('div');
-                div.className = `p-5 rounded-[1.5rem] border-2 transition-all hover:scale-[1.02] ${isRight ? 'border-emerald-50 bg-emerald-50/20' : 'border-red-50 bg-red-50/20'}`;
+                
+                const bgClass = isRight ? 'bg-emerald-50 border-emerald-100' : 'bg-rose-50 border-rose-100';
+                const iconClass = isRight ? 'ph-check-circle text-emerald-500' : 'ph-x-circle text-rose-500';
+                const textClass = isRight ? 'text-emerald-700' : 'text-rose-700';
+
+                div.className = `p-4 rounded-xl border ${bgClass} flex gap-4 items-start`;
                 div.innerHTML = `
-                    <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 rounded-xl flex items-center justify-center font-black ${isRight ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'}">
-                            ${qId.replace('q','')}
+                    <div class="mt-1">
+                        <i class="ph ${iconClass} text-2xl"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-bold text-slate-800 text-sm mb-1">Questão ${qId.replace('q','')}: <span class="font-medium text-slate-600">${q.pergunta}</span></p>
+                        <div class="bg-white/60 px-3 py-2 rounded-md border border-white/40 inline-block">
+                            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Resposta do Aluno</span>
+                            <span class="text-sm font-bold ${textClass}">${q.respostaAluno}</span>
                         </div>
-                        <div>
-                            <p class="font-bold text-dark text-sm">${q.pergunta}</p>
-                            <p class="text-[10px] text-slate-400 font-bold uppercase mt-1">Resposta: ${q.respostaAluno}</p>
-                        </div>
-                        <i class="ph ${isRight ? 'ph-check-circle-fill text-emerald-500' : 'ph-x-circle-fill text-red-500'} text-2xl ml-auto"></i>
                     </div>
                 `;
                 els.modal.list.appendChild(div);
             });
 
+            // Show Modal
             els.modal.overlay.classList.remove('hidden');
         };
 
+        // EVENT LISTENERS
         els.modal.btnClose.addEventListener('click', () => els.modal.overlay.classList.add('hidden'));
-        els.btnRefresh.addEventListener('click', fetchData);
+        els.modal.bg.addEventListener('click', () => els.modal.overlay.classList.add('hidden'));
+        
+        els.btnRefresh.addEventListener('click', () => {
+            fetchData();
+            showToast("Atualizando dados...", "info");
+        });
+        
         els.searchInput.addEventListener('input', updateUI);
         els.filterTurma.addEventListener('change', updateUI);
         els.filterAtividade.addEventListener('change', updateUI);
+
+        els.modal.btnPrint.addEventListener('click', () => {
+            window.print();
+        });
 
     </script>
 </body>
